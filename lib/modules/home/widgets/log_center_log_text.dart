@@ -27,6 +27,7 @@ class LogCenterLogText extends StatelessWidget {
   Widget build(BuildContext context) {
     final style = _selectStyle(context);
     final richText = line.length <= kErrorLogPlainTextThreshold;
+    final selectionStyle = DefaultSelectionStyle.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: RichText(
@@ -36,6 +37,10 @@ class LogCenterLogText extends StatelessWidget {
               ? _LogTextSpanBuilder(line, style).build()
               : [TextSpan(text: line)],
         ),
+        selectionRegistrar: SelectionContainer.maybeOf(context),
+        selectionColor:
+            selectionStyle.selectionColor ??
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.28),
         maxLines: maxLines,
         overflow: overflow,
         softWrap: softWrap,

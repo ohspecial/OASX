@@ -34,7 +34,7 @@ extension _LogCenterErrorDetailLogSectionX on LogCenterErrorDetailView {
         ),
     ];
     if (controller.wrapLines.value) {
-      widgets.add(_buildWrappedLogSliver(lines));
+      widgets.add(_buildWrappedLogSliver(context, lines));
       return widgets;
     }
     widgets.add(_buildHorizontalLogSliver(context, lines));
@@ -42,20 +42,55 @@ extension _LogCenterErrorDetailLogSectionX on LogCenterErrorDetailView {
   }
 
   /// Builds the wrapped vertical log sliver.
-  Widget _buildWrappedLogSliver(List<String> lines) {
-    return SliverList.builder(
-      itemCount: lines.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.only(right: 12),
-          child: LogCenterLogText(
-            line: lines[index],
-            maxLines: null,
-            overflow: TextOverflow.clip,
-            softWrap: true,
-          ),
-        );
-      },
+  Widget _buildWrappedLogSliver(BuildContext context, List<String> lines) {
+    return SliverToBoxAdapter(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: () => _openCopyDialog(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: lines.map((line) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: LogCenterLogText(
+                line: line,
+                maxLines: null,
+                overflow: TextOverflow.clip,
+                softWrap: true,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  /// Builds a selectable non-wrapped error log body.
+  Widget _buildSelectableHorizontalLogArea(
+    BuildContext context,
+    List<String> lines,
+    double width,
+  ) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () => _openCopyDialog(context),
+      child: SizedBox(
+        width: width,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: lines.map((line) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: LogCenterLogText(
+                line: line,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
+                softWrap: false,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
@@ -79,29 +114,20 @@ extension _LogCenterErrorDetailLogSectionX on LogCenterErrorDetailView {
             child: SingleChildScrollView(
               controller: detailHorizontalScrollController,
               scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: width,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: lines
-                      .map(
-                        (line) => Padding(
-                          padding: const EdgeInsets.only(right: 12),
-                          child: LogCenterLogText(
-                            line: line,
-                            maxLines: 1,
-                            overflow: TextOverflow.visible,
-                            softWrap: false,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
+              child: _buildSelectableHorizontalLogArea(context, lines, width),
             ),
           );
         },
       ),
+    );
+  }
+
+  /// Opens the dedicated copy dialog with the current error-detail log body.
+  void _openCopyDialog(BuildContext context) {
+    showLogCenterCopyDialog(
+      context,
+      text: controller.selectedErrorLogText,
+      onCopy: controller.copyText,
     );
   }
 

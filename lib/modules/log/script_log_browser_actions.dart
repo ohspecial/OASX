@@ -131,6 +131,21 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
     await stopStream();
   }
 
+  /// Returns the current info-log payload with preserved line breaks.
+  String get infoLogText => lines.map((line) => line.text).join('\n');
+
+  /// Returns the current error-detail log payload with preserved line breaks.
+  String get selectedErrorLogText => selectedErrorLogLines.join('\n');
+
+  /// Copies the current visible log payload.
+  void copyCurrentView() {
+    if (activeTab.value == ScriptLogBrowserTab.error) {
+      copySelectedErrorLog();
+      return;
+    }
+    copyInfoLogs();
+  }
+
   /// Clears active loading flags when pending requests are invalidated.
   void completePendingLoads() {
     _infoLoadRequestId = 0;

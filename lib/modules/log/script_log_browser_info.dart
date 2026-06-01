@@ -75,7 +75,7 @@ extension ScriptLogBrowserInfoX on ScriptLogBrowserController {
 
   /// Copies info lines to clipboard.
   void copyInfoLogs() {
-    copyText(lines.map((line) => line.text).join('\n'));
+    copyText(infoLogText);
   }
 
   /// Starts the live stream without replacing the current visible window.

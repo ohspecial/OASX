@@ -88,21 +88,25 @@ class LogCenterInfoView extends StatelessWidget {
   }
 
   Widget _buildVerticalList(BuildContext context, {required bool wrapLines}) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: onScrollNotification,
-      child: ListView.builder(
-        key: ValueKey<String>('log-info-${controller.scriptName}'),
-        controller: scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        itemCount: controller.lines.length,
-        itemBuilder: (context, index) {
-          return LogCenterLogText(
-            line: controller.lines[index].text,
-            maxLines: wrapLines ? null : 1,
-            overflow: wrapLines ? TextOverflow.clip : TextOverflow.visible,
-            softWrap: wrapLines,
-          );
-        },
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () => _openCopyDialog(context),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: onScrollNotification,
+        child: ListView.builder(
+          key: ValueKey<String>('log-info-${controller.scriptName}'),
+          controller: scrollController,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          itemCount: controller.lines.length,
+          itemBuilder: (context, index) {
+            return LogCenterLogText(
+              line: controller.lines[index].text,
+              maxLines: wrapLines ? null : 1,
+              overflow: wrapLines ? TextOverflow.clip : TextOverflow.visible,
+              softWrap: wrapLines,
+            );
+          },
+        ),
       ),
     );
   }
@@ -121,6 +125,15 @@ class LogCenterInfoView extends StatelessWidget {
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
+    );
+  }
+
+  /// Opens the dedicated copy dialog with the current info log body.
+  void _openCopyDialog(BuildContext context) {
+    showLogCenterCopyDialog(
+      context,
+      text: controller.infoLogText,
+      onCopy: controller.copyText,
     );
   }
 }

@@ -131,7 +131,9 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
 
   /// Copies the selected error log text.
   void copySelectedErrorLog() {
-    final text = selectedErrorDetail.value?.log.content ?? '';
+    final text = selectedErrorLogText.isEmpty
+        ? selectedErrorDetail.value?.log.content ?? ''
+        : selectedErrorLogText;
     copyText(text);
   }
 

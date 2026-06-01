@@ -132,10 +132,6 @@ class LogCenterToolbar extends StatelessWidget {
   }
 
   void _copyCurrent() {
-    if (controller.activeTab.value == ScriptLogBrowserTab.error) {
-      controller.copySelectedErrorLog();
-      return;
-    }
-    controller.copyInfoLogs();
+    controller.copyCurrentView();
   }
 }

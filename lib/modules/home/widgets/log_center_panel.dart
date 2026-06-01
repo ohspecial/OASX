@@ -5,6 +5,7 @@ import 'package:oasx/modules/log/log_browser_models.dart';
 import 'package:oasx/modules/log/script_log_browser_controller.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
+part 'log_center_copy_dialog.dart';
 part 'log_center_error_view.dart';
 part 'log_center_error_detail_view.dart';
 part 'log_center_error_log_section.dart';
