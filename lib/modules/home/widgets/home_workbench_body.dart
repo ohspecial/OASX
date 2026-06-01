@@ -20,7 +20,10 @@ class HomeWorkbenchBody extends StatefulWidget {
   final Widget Function(HomeWorkbenchLayoutMode layoutMode) collectionBuilder;
 
   /// Builds the active workbench pane for the resolved layout.
-  final Widget Function(HomeWorkbenchLayoutMode layoutMode) detailsBuilder;
+  final Widget Function(
+    HomeWorkbenchLayoutMode layoutMode,
+    VoidCallback? onExpandRightSidebar,
+  ) detailsBuilder;
 
   /// Right sidebar widget reused in three-pane mode.
   final Widget sidebar;
@@ -91,20 +94,22 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
           final layoutMode = layout.mode;
           widget.controller.setWorkbenchLayoutMode(layoutMode);
           final collection = widget.collectionBuilder(layoutMode);
+          final canExpandRightSidebar = _forceTwoPane &&
+              unrestrictedLayout.mode == HomeWorkbenchLayoutMode.threePane;
           final details = _buildPaneFrame(
-            child: widget.detailsBuilder(layoutMode),
+            child: widget.detailsBuilder(
+              layoutMode,
+              canExpandRightSidebar ? _handleRightSidebarExpand : null,
+            ),
             highlighted:
                 _pendingCollapseSide == HomeWorkbenchCollapseSide.workbench,
             progress: _pendingCollapseProgress,
           );
-          final canExpandRightSidebar = _forceTwoPane &&
-              unrestrictedLayout.mode == HomeWorkbenchLayoutMode.threePane;
           if (layoutMode != HomeWorkbenchLayoutMode.singlePane) {
             return _buildDesktopLayout(
               layout: layout,
               collection: collection,
               details: details,
-              canExpandRightSidebar: canExpandRightSidebar,
             );
           }
           return Obx(() {
@@ -123,15 +128,8 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
     required HomeWorkbenchLayout layout,
     required Widget collection,
     required Widget details,
-    required bool canExpandRightSidebar,
   }) {
     final isThreePane = layout.mode == HomeWorkbenchLayoutMode.threePane;
-    final desktopDetails = isThreePane
-        ? details
-        : _buildTwoPaneDetails(
-            details: details,
-            canExpandRightSidebar: canExpandRightSidebar,
-          );
     return Row(
       key: const ValueKey<String>('home-workbench-desktop'),
       children: [
@@ -144,7 +142,7 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
           collapseSide: null,
           collapseProgress: 0,
         ),
-        SizedBox(width: layout.detailsWidth, child: desktopDetails),
+        SizedBox(width: layout.detailsWidth, child: details),
         if (isThreePane) ...[
           _WorkbenchDivider(
             key: const ValueKey<String>('home-workbench-right-divider'),
@@ -186,30 +184,6 @@ class _HomeWorkbenchBodyState extends State<HomeWorkbenchBody> {
       collectionWidth: currentCollectionWidth,
       splitRatio: currentSplitRatio,
       forceTwoPane: _forceTwoPane,
-    );
-  }
-
-  /// Adds a restore action when the right sidebar was manually collapsed.
-  Widget _buildTwoPaneDetails({
-    required Widget details,
-    required bool canExpandRightSidebar,
-  }) {
-    if (!canExpandRightSidebar) {
-      return details;
-    }
-    return Stack(
-      children: [
-        Positioned.fill(child: details),
-        Positioned(
-          top: 12,
-          right: 12,
-          child: IconButton.filledTonal(
-            key: const ValueKey<String>('home-workbench-expand-right-sidebar'),
-            onPressed: _handleRightSidebarExpand,
-            icon: const Icon(Icons.keyboard_double_arrow_left_rounded),
-          ),
-        ),
-      ],
     );
   }
 

@@ -23,6 +23,7 @@ class ActiveConfigPanel extends StatelessWidget {
     required this.onSetNextRun,
     required this.onQuickRun,
     required this.onQuickWait,
+    this.onExpandRightSidebar,
     this.onBackToScripts,
   });
 
@@ -39,6 +40,7 @@ class ActiveConfigPanel extends StatelessWidget {
   final Future<void> Function(String taskName, String nextRun) onSetNextRun;
   final Future<void> Function(String taskName) onQuickRun;
   final Future<void> Function(String taskName) onQuickWait;
+  final VoidCallback? onExpandRightSidebar;
   final VoidCallback? onBackToScripts;
 
   @override
@@ -81,6 +83,18 @@ class ActiveConfigPanel extends StatelessWidget {
                     onPressed: () => onTogglePower(script.name, !isRunning),
                     icon: const Icon(Icons.power_settings_new_rounded),
                   ),
+                  if (onExpandRightSidebar != null) const SizedBox(width: 8),
+                  if (onExpandRightSidebar != null)
+                    IconButton.filledTonal(
+                      key: const ValueKey<String>(
+                        'home-workbench-expand-right-sidebar',
+                      ),
+                      tooltip: I18n.homeRestoreSidebar.tr,
+                      onPressed: onExpandRightSidebar,
+                      icon: const Icon(
+                        Icons.keyboard_double_arrow_left_rounded,
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 12),

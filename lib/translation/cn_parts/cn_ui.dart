@@ -164,6 +164,7 @@ final Map<String, String> _cn_ui = {
   I18n.homeSortByStatus: '按状态排序',
   I18n.homeSortByName: '按名称排序',
   I18n.homeNoScriptSelected: '请先选择一个配置',
+  I18n.homeRestoreSidebar: '恢复右侧栏',
   I18n.homeStatusTab: '状态',
   I18n.homeTasksTab: '任务',
   I18n.homeStatsTab: '统计',

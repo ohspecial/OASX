@@ -48,7 +48,7 @@ class ConfigWorkbench extends StatelessWidget {
         onRenameScript: (scriptName) => _renameScript(context, scriptName),
         onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
       ),
-      detailsBuilder: (layoutMode) => ActiveConfigPanel(
+      detailsBuilder: (layoutMode, onExpandRightSidebar) => ActiveConfigPanel(
         controller: controller,
         layoutMode: layoutMode,
         onChangeTab: (tab) => _changeTab(context, tab),
@@ -62,6 +62,7 @@ class ConfigWorkbench extends StatelessWidget {
         onSetNextRun: _setTaskNextRun,
         onQuickRun: (taskName) => _quickSchedule(taskName, true),
         onQuickWait: (taskName) => _quickSchedule(taskName, false),
+        onExpandRightSidebar: onExpandRightSidebar,
         onBackToScripts: layoutMode == HomeWorkbenchLayoutMode.singlePane
             ? () => _showScriptListPage(context)
             : null,

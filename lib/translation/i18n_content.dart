@@ -127,7 +127,8 @@ class I18n {
       homeScriptSearchHint = 'home_script_search_hint';
   static const String homeSortByStatus = 'home_sort_by_status',
       homeSortByName = 'home_sort_by_name',
-      homeNoScriptSelected = 'home_no_script_selected';
+      homeNoScriptSelected = 'home_no_script_selected',
+      homeRestoreSidebar = 'home_restore_sidebar';
   static const String homeStatusTab = 'home_status_tab',
       homeTasksTab = 'home_tasks_tab',
       homeParamsTab = 'home_params_tab';
