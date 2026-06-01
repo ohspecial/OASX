@@ -20,6 +20,13 @@ part 'script_log_browser_errors.dart';
 part 'script_log_browser_info.dart';
 part 'script_log_browser_state.dart';
 part 'script_log_browser_stream.dart';
+part 'script_log_browser_window.dart';
+
+/// Log window line count used for live-following mode.
+const int kAutoScrollLogWindowLineLimit = 100;
+
+/// Log window line count used for manual review mode.
+const int kManualScrollLogWindowLineLimit = 300;
 
 /// Script-scoped log browser controller.
 class ScriptLogBrowserController extends GetxController {
@@ -145,6 +152,9 @@ class ScriptLogBrowserController extends GetxController {
 
   /// Whether a bottom sync has already been queued for this frame.
   bool _bottomSyncQueued = false;
+
+  /// Maximum lines retained in the current visible info window.
+  int retainedLogLineLimit = kAutoScrollLogWindowLineLimit;
 
   @override
   void onClose() {

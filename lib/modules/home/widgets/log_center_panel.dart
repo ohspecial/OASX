@@ -4,13 +4,13 @@ import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/log/log_browser_models.dart';
 import 'package:oasx/modules/log/script_log_browser_controller.dart';
 import 'package:oasx/translation/i18n_content.dart';
-import 'package:easy_rich_text/easy_rich_text.dart';
 
 part 'log_center_error_view.dart';
 part 'log_center_error_detail_view.dart';
 part 'log_center_error_image_card.dart';
 part 'log_center_info_view.dart';
 part 'log_center_log_text.dart';
+part 'log_center_log_text_span_builder.dart';
 part 'log_center_toolbar.dart';
 part 'log_center_panel_scroll.dart';
 

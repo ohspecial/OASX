@@ -9,6 +9,7 @@ extension ScriptLogBrowserStreamX on ScriptLogBrowserController {
     final uri = ApiClient().buildScriptLogStreamUri(
       scriptName,
       cursor: liveCursor,
+      limitLines: kAutoScrollLogWindowLineLimit,
     );
     streamClient = ApiSseClient(
       url: uri,
@@ -85,6 +86,7 @@ extension ScriptLogBrowserStreamX on ScriptLogBrowserController {
             maxLineWidthScore = score;
           }
         }
+        trimToLiveWindow();
       }
     }
     updateLiveCursor(data['next_cursor']);

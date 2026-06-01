@@ -37,11 +37,7 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
     if (!autoScroll.value) {
       autoScroll.value = true;
     }
-    trimToLiveWindow();
-    syncBottomAfterFrame();
-    if (streamClient == null) {
-      unawaited(resumeLiveStream());
-    }
+    unawaited(refreshLatest());
   }
 
   /// Toggles auto-scroll state.
@@ -72,11 +68,12 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
   /// Sets auto-scroll according to viewport bottom state.
   void handleViewportPosition({required bool isAtBottom}) {
     if (isAtBottom && !autoScroll.value) {
-      autoScroll.value = true;
+      enableAutoScroll();
       return;
     }
     if (!isAtBottom && autoScroll.value) {
       autoScroll.value = false;
+      retainedLogLineLimit = kManualScrollLogWindowLineLimit;
     }
   }
 
