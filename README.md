@@ -55,7 +55,7 @@ OASX 是面向 OAS 的 Flutter GUI 客户端，负责提供连接配置、本地
 
 - Windows
 - Android
-- Web
+- Web ([点击前往OASX](https://azurtian.github.io/OASX))
 
 ## 快速开始
 
