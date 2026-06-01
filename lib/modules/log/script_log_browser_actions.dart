@@ -15,6 +15,10 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
       unawaited(refreshLatest());
       return;
     }
+    if (_shouldRefreshLatestOnInfoResume) {
+      unawaited(refreshLatest());
+      return;
+    }
     if (autoScroll.value) {
       trimToLiveWindow();
       syncBottomAfterFrame();
@@ -30,6 +34,10 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
   void selectTab(ScriptLogBrowserTab tab) {
     if (tab != ScriptLogBrowserTab.error) {
       cancelSelectedErrorRenderWork();
+    }
+    if (activeTab.value == ScriptLogBrowserTab.info &&
+        tab != ScriptLogBrowserTab.info) {
+      handleInfoViewHidden();
     }
     activeTab.value = tab;
     activate();
@@ -78,6 +86,11 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
       autoScroll.value = false;
       retainedLogLineLimit = kManualScrollLogWindowLineLimit;
     }
+  }
+
+  /// Records whether returning to info view should refresh the latest window.
+  void handleInfoViewHidden() {
+    _shouldRefreshLatestOnInfoResume = autoScroll.value;
   }
 
   /// Copies text and shows the shared success snackbar.

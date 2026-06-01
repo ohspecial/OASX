@@ -17,6 +17,7 @@ extension ScriptLogBrowserInfoX on ScriptLogBrowserController {
         return;
       }
       applyFreshWindow(window);
+      _shouldRefreshLatestOnInfoResume = false;
       syncWindowLimitForMode();
       infoLoading.value = false;
       unawaited(startStream(requestId));

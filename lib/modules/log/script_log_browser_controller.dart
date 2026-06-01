@@ -175,8 +175,14 @@ class ScriptLogBrowserController extends GetxController {
   /// Whether a bottom sync has already been queued for this frame.
   bool _bottomSyncQueued = false;
 
+  /// Whether info view should reload the latest window when re-entered.
+  bool _shouldRefreshLatestOnInfoResume = false;
+
   /// Maximum lines retained in the current visible info window.
   int retainedLogLineLimit = kAutoScrollLogWindowLineLimit;
+
+  /// Returns whether info view should reload latest logs on the next activate.
+  bool get shouldRefreshLatestOnInfoResume => _shouldRefreshLatestOnInfoResume;
 
   @override
   void onClose() {

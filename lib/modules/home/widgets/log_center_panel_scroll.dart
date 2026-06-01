@@ -34,6 +34,14 @@ void _activateLogCenterControllerAfterFrame(
     if (controller.viewportOwner != state._viewportOwner) {
       return;
     }
+    if (controller.activeTab.value == ScriptLogBrowserTab.error) {
+      controller.activate();
+      return;
+    }
+    if (controller.shouldRefreshLatestOnInfoResume) {
+      controller.activate();
+      return;
+    }
     if (controller.autoScroll.value) {
       controller.trimToLiveWindow();
       _scrollLogCenterToBottom(state, jumpOnly: true);
@@ -52,6 +60,9 @@ void _releaseLogCenterController(
   final controller = state._controller;
   if (controller == null || controller.viewportOwner != state._viewportOwner) {
     return;
+  }
+  if (controller.activeTab.value == ScriptLogBrowserTab.info) {
+    controller.handleInfoViewHidden();
   }
   controller.scrollToBottom = null;
   controller.restoreScrollOffset = null;
