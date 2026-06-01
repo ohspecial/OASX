@@ -105,22 +105,27 @@ class LogCenterErrorDetailView extends StatelessWidget {
     ScriptErrorLogDetail detail, {
     required String title,
   }) {
-    return CustomScrollView(
+    return Scrollbar(
       controller: detailScrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: _buildHeader(
-            context,
-            title,
-            trailing: _buildScrollToBottomButton(),
+      interactive: true,
+      thumbVisibility: true,
+      child: CustomScrollView(
+        controller: detailScrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: _buildHeader(
+              context,
+              title,
+              trailing: _buildScrollToBottomButton(),
+            ),
           ),
-        ),
-        const SliverToBoxAdapter(child: SizedBox(height: 8)),
-        SliverToBoxAdapter(child: _buildImages(detail)),
-        if (detail.images.isNotEmpty)
-          const SliverToBoxAdapter(child: SizedBox(height: 6)),
-        ..._buildLogSlivers(context),
-      ],
+          const SliverToBoxAdapter(child: SizedBox(height: 8)),
+          SliverToBoxAdapter(child: _buildImages(detail)),
+          if (detail.images.isNotEmpty)
+            const SliverToBoxAdapter(child: SizedBox(height: 6)),
+          ..._buildLogSlivers(context),
+        ],
+      ),
     );
   }
 

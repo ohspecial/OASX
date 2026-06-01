@@ -48,6 +48,7 @@ class LogCenterInfoView extends StatelessWidget {
   Widget _buildList(BuildContext context, bool wrapLines) {
     return Scrollbar(
       controller: scrollController,
+      interactive: true,
       thumbVisibility: true,
       notificationPredicate: (notification) {
         return notification.metrics.axis == Axis.vertical;
@@ -68,6 +69,7 @@ class LogCenterInfoView extends StatelessWidget {
         final width = _resolveContentWidth(context, constraints.maxWidth);
         return Scrollbar(
           controller: horizontalScrollController,
+          interactive: true,
           thumbVisibility: width > constraints.maxWidth,
           notificationPredicate: (notification) {
             return notification.metrics.axis == Axis.horizontal;

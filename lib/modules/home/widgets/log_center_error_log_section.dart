@@ -63,6 +63,7 @@ extension _LogCenterErrorDetailLogSectionX on LogCenterErrorDetailView {
           );
           return Scrollbar(
             controller: detailHorizontalScrollController,
+            interactive: true,
             thumbVisibility: width > constraints.maxWidth,
             notificationPredicate: (notification) {
               return notification.metrics.axis == Axis.horizontal;

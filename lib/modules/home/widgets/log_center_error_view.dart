@@ -48,6 +48,7 @@ class LogCenterErrorView extends StatelessWidget {
         Expanded(
           child: Scrollbar(
             controller: listScrollController,
+            interactive: true,
             thumbVisibility: true,
             child: ListView.separated(
               controller: listScrollController,
