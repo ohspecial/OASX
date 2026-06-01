@@ -241,6 +241,8 @@ final Map<String, String> _cn_ui = {
   I18n.homeLogImages: '张截图',
   I18n.homeLogSelectError: '请选择一条错误日志',
   I18n.homeLogDownloadImage: '下载图片',
+  I18n.homeLogImageSaveSuccess: '图片已保存',
+  I18n.homeLogImageSaveFailed: '保存图片失败',
   I18n.homeLogScrollToBottom: '滚动到底部',
   I18n.argsDraftDirty: '待保存',
   I18n.argsMixedValue: '混合值',

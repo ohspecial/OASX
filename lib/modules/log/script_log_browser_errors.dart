@@ -178,17 +178,33 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
       );
       if (kIsWeb) {
         await downloadBytesToBrowser(payload.bytes, payload.fileName);
+        Get.snackbar(
+          I18n.tip.tr,
+          I18n.homeLogImageSaveSuccess.tr,
+          duration: const Duration(seconds: 1),
+        );
         return;
       }
       final path = await FilePicker.platform.saveFile(
         fileName: payload.fileName,
         type: FileType.image,
         allowedExtensions: const ['png'],
+        bytes: payload.bytes,
       );
       if (path == null || path.trim().isEmpty) {
         return;
       }
-      await saveBytesToPath(path, payload.bytes);
+      Get.snackbar(
+        I18n.tip.tr,
+        I18n.homeLogImageSaveSuccess.tr,
+        duration: const Duration(seconds: 1),
+      );
+    } catch (_) {
+      Get.snackbar(
+        I18n.tip.tr,
+        I18n.homeLogImageSaveFailed.tr,
+        duration: const Duration(seconds: 2),
+      );
     } finally {
       downloadingImageKeys.remove(downloadKey);
     }

@@ -12,8 +12,6 @@ import 'package:oasx/modules/log/log_browser_models.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/browser_download_io.dart'
     if (dart.library.html) 'package:oasx/utils/browser_download_web.dart';
-import 'package:oasx/utils/file_save_stub.dart'
-    if (dart.library.io) 'package:oasx/utils/file_save_io.dart';
 
 part 'script_log_browser_actions.dart';
 part 'script_log_browser_errors.dart';
