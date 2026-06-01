@@ -206,7 +206,8 @@ class I18n {
       homeLogNoErrors = 'home_log_no_errors';
   static const String homeLogImages = 'home_log_images',
       homeLogSelectError = 'home_log_select_error',
-      homeLogDownloadImage = 'home_log_download_image';
+      homeLogDownloadImage = 'home_log_download_image',
+      homeLogScrollToBottom = 'home_log_scroll_to_bottom';
   static const String taskManage = 'task_manage',
       taskManageTitle = 'task_manage_title',
       taskSearchHint = 'task_search_hint';

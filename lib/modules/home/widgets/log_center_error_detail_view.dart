@@ -29,7 +29,11 @@ class LogCenterErrorDetailView extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildHeader(context, _formatDetailTime(detail)),
+          _buildHeader(
+            context,
+            _formatDetailTime(detail),
+            trailing: _buildScrollToBottomButton(),
+          ),
           const SizedBox(height: 8),
           Expanded(child: _buildBody(context, detail)),
         ],
@@ -103,7 +107,7 @@ class LogCenterErrorDetailView extends StatelessWidget {
   }
 
   /// Builds a detail header with a back action.
-  Widget _buildHeader(BuildContext context, String title) {
+  Widget _buildHeader(BuildContext context, String title, {Widget? trailing}) {
     return Row(
       children: [
         IconButton(
@@ -114,7 +118,17 @@ class LogCenterErrorDetailView extends StatelessWidget {
         Expanded(
           child: Text(title, style: Theme.of(context).textTheme.titleSmall),
         ),
+        if (trailing != null) ...[const SizedBox(width: 8), trailing],
       ],
+    );
+  }
+
+  /// Builds the action that scrolls the error detail view to the latest line.
+  Widget _buildScrollToBottomButton() {
+    return IconButton(
+      tooltip: I18n.homeLogScrollToBottom.tr,
+      onPressed: _scrollDetailToBottom,
+      icon: const Icon(Icons.vertical_align_bottom_rounded),
     );
   }
 
@@ -157,5 +171,28 @@ class LogCenterErrorDetailView extends StatelessWidget {
     }
     final item = controller.errorItems[index];
     return controller.formatErrorTimestamp(item.timestampMs, item.time);
+  }
+
+  /// Scrolls the vertical detail viewport to the current bottom edge.
+  void _scrollDetailToBottom() {
+    if (!detailScrollController.hasClients) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!detailScrollController.hasClients) {
+        return;
+      }
+      final target = detailScrollController.position.maxScrollExtent;
+      final distance = (detailScrollController.offset - target).abs();
+      if (distance > 400) {
+        detailScrollController.jumpTo(target);
+        return;
+      }
+      detailScrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+      );
+    });
   }
 }

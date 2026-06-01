@@ -49,9 +49,16 @@ class LogCenterErrorView extends StatelessWidget {
           child: Scrollbar(
             controller: listScrollController,
             thumbVisibility: true,
-            child: ListView.builder(
+            child: ListView.separated(
               controller: listScrollController,
               itemCount: controller.errorItems.length,
+              separatorBuilder: (context, index) {
+                return Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                );
+              },
               itemBuilder: (context, index) {
                 final item = controller.errorItems[index];
                 return Obx(() {

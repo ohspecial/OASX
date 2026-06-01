@@ -172,6 +172,7 @@ final Map<String, String> _us_ui = {
   I18n.homeLogImages: 'images',
   I18n.homeLogSelectError: 'Select an error log',
   I18n.homeLogDownloadImage: 'Download image',
+  I18n.homeLogScrollToBottom: 'Scroll to bottom',
   I18n.argsDraftDirty: 'Pending changes',
   I18n.argsMixedValue: 'Mixed value',
   I18n.argsDiscardChanges: 'Discard',
