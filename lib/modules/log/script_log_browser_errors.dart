@@ -194,6 +194,9 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
       if (path == null || path.trim().isEmpty) {
         return;
       }
+      if (!_isMobileTargetPlatform()) {
+        await saveBytesToPath(path, payload.bytes);
+      }
       Get.snackbar(
         I18n.tip.tr,
         I18n.homeLogImageSaveSuccess.tr,
@@ -208,5 +211,11 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
     } finally {
       downloadingImageKeys.remove(downloadKey);
     }
+  }
+
+  /// Returns whether the current runtime target is mobile.
+  bool _isMobileTargetPlatform() {
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
   }
 }

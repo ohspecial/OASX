@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show VoidCallback, kIsWeb;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, VoidCallback, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,8 @@ import 'package:oasx/modules/log/log_browser_models.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/browser_download_io.dart'
     if (dart.library.html) 'package:oasx/utils/browser_download_web.dart';
+import 'package:oasx/utils/file_save_stub.dart'
+    if (dart.library.io) 'package:oasx/utils/file_save_io.dart';
 
 part 'script_log_browser_actions.dart';
 part 'script_log_browser_errors.dart';
