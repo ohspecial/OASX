@@ -28,6 +28,9 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
 
   /// Selects the visible tab.
   void selectTab(ScriptLogBrowserTab tab) {
+    if (tab != ScriptLogBrowserTab.error) {
+      cancelSelectedErrorRenderWork();
+    }
     activeTab.value = tab;
     activate();
   }
@@ -98,6 +101,7 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
 
   /// Clears the selected error detail only.
   void clearSelectedError() {
+    cancelSelectedErrorRenderWork();
     selectedErrorId.value = '';
     selectedErrorTitle.value = '';
     selectedErrorDetail.value = null;
@@ -110,6 +114,7 @@ extension ScriptLogBrowserActionsX on ScriptLogBrowserController {
     revision++;
     stopErrorListAutoRefresh();
     completePendingLoads();
+    cancelSelectedErrorRenderWork();
     await stopStream();
   }
 

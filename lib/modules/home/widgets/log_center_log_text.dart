@@ -26,12 +26,15 @@ class LogCenterLogText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = _selectStyle(context);
+    final richText = line.length <= kErrorLogPlainTextThreshold;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: RichText(
         text: TextSpan(
           style: style,
-          children: _LogTextSpanBuilder(line, style).build(),
+          children: richText
+              ? _LogTextSpanBuilder(line, style).build()
+              : [TextSpan(text: line)],
         ),
         maxLines: maxLines,
         overflow: overflow,

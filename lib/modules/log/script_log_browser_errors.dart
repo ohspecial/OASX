@@ -92,15 +92,18 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
       }
     }
     final requestId = revision;
+    final renderToken = ++_errorDetailRenderToken;
     _errorDetailRequestId = requestId;
     selectedErrorId.value = normalized;
     selectedErrorTitle.value = selectedItem == null
         ? ''
         : formatErrorTimestamp(selectedItem.timestampMs, selectedItem.time);
+    resetSelectedErrorRenderState();
     selectedErrorDetail.value = null;
     errorDetailVisible.value = true;
     errorDetailLoading.value = true;
     errorMessage.value = '';
+    resetErrorDetailViewport?.call();
     try {
       final detail = await ApiClient().getScriptErrorLogDetail(normalized);
       if (!isErrorDetailLoadActive(requestId) ||
@@ -108,6 +111,10 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
         return;
       }
       selectedErrorDetail.value = detail;
+      scheduleSelectedErrorLogPreparation(
+        detail: detail,
+        renderToken: renderToken,
+      );
     } catch (error) {
       if (isErrorDetailLoadActive(requestId)) {
         errorMessage.value = error.toString();
@@ -130,6 +137,7 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
 
   /// Returns to the error list page.
   void backToErrorList() {
+    cancelSelectedErrorRenderWork();
     errorDetailVisible.value = false;
     refreshVisibleErrorList();
   }

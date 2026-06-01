@@ -7,6 +7,7 @@ import 'package:oasx/translation/i18n_content.dart';
 
 part 'log_center_error_view.dart';
 part 'log_center_error_detail_view.dart';
+part 'log_center_error_log_section.dart';
 part 'log_center_error_image_card.dart';
 part 'log_center_info_view.dart';
 part 'log_center_log_text.dart';
@@ -147,6 +148,9 @@ class _LogCenterPanelState extends State<LogCenterPanel> {
     };
     controller.preserveViewportAfterPrepend = (insertedCount) {
       _preserveLogCenterViewportAfterPrepend(this, insertedCount);
+    };
+    controller.resetErrorDetailViewport = () {
+      _resetErrorDetailViewport(this);
     };
     previousScrollController?.dispose();
     _activateLogCenterControllerAfterFrame(this, controller);

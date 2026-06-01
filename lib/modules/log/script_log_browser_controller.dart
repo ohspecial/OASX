@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart'
@@ -17,7 +18,9 @@ import 'package:oasx/utils/file_save_stub.dart'
     if (dart.library.io) 'package:oasx/utils/file_save_io.dart';
 
 part 'script_log_browser_actions.dart';
+part 'script_log_browser_error_detail_render.dart';
 part 'script_log_browser_errors.dart';
+part 'script_log_browser_error_render.dart';
 part 'script_log_browser_info.dart';
 part 'script_log_browser_state.dart';
 part 'script_log_browser_stream.dart';
@@ -79,6 +82,12 @@ class ScriptLogBrowserController extends GetxController {
   /// Selected error detail.
   final selectedErrorDetail = Rxn<ScriptErrorLogDetail>();
 
+  /// Prepared error detail log lines for virtual rendering.
+  final selectedErrorLogLines = <String>[].obs;
+
+  /// Cached score for the widest error detail log line.
+  final selectedErrorLogMaxWidthScore = 0.obs;
+
   /// Image download keys currently running.
   final downloadingImageKeys = <String>[].obs;
 
@@ -90,6 +99,12 @@ class ScriptLogBrowserController extends GetxController {
 
   /// Whether error detail is loading.
   final errorDetailLoading = false.obs;
+
+  /// Whether error log lines are being prepared.
+  final errorLogPreparing = false.obs;
+
+  /// Whether remaining error log lines are still appending.
+  final errorLogAppending = false.obs;
 
   /// User-visible error page failure.
   final errorMessage = ''.obs;
@@ -114,6 +129,9 @@ class ScriptLogBrowserController extends GetxController {
 
   /// Callback used by UI after history prepend.
   void Function(int insertedCount)? preserveViewportAfterPrepend;
+
+  /// Callback used by UI to reset the error detail viewport.
+  VoidCallback? resetErrorDetailViewport;
 
   /// UI owner currently bound to viewport callbacks.
   Object? viewportOwner;
@@ -151,6 +169,9 @@ class ScriptLogBrowserController extends GetxController {
   /// Active error detail request id.
   int _errorDetailRequestId = 0;
 
+  /// Token used to cancel stale error detail render work.
+  int _errorDetailRenderToken = 0;
+
   /// Whether a bottom sync has already been queued for this frame.
   bool _bottomSyncQueued = false;
 
@@ -162,6 +183,7 @@ class ScriptLogBrowserController extends GetxController {
     scrollToBottom = null;
     restoreScrollOffset = null;
     preserveViewportAfterPrepend = null;
+    resetErrorDetailViewport = null;
     stopErrorListAutoRefresh();
     unawaited(stopStream());
     super.onClose();

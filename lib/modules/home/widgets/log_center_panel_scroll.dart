@@ -56,10 +56,25 @@ void _releaseLogCenterController(
   controller.scrollToBottom = null;
   controller.restoreScrollOffset = null;
   controller.preserveViewportAfterPrepend = null;
+  controller.resetErrorDetailViewport = null;
   controller.viewportOwner = null;
   if (suspend) {
     controller.suspend();
   }
+}
+
+/// Resets the error detail viewport to the initial position.
+void _resetErrorDetailViewport(_LogCenterPanelState state) {
+  final vertical = state._errorDetailScrollController;
+  final horizontal = state._errorDetailHorizontalScrollController;
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (vertical != null && vertical.hasClients) {
+      vertical.jumpTo(0);
+    }
+    if (horizontal != null && horizontal.hasClients) {
+      horizontal.jumpTo(0);
+    }
+  });
 }
 
 /// Handles one scroll notification from the info log list.

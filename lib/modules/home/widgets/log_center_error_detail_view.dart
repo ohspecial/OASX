@@ -1,6 +1,6 @@
 part of 'log_center_panel.dart';
 
-/// Error detail page with image preview and log text.
+/// Error detail page with progressive image and log rendering.
 class LogCenterErrorDetailView extends StatelessWidget {
   /// Creates one error detail view.
   const LogCenterErrorDetailView({
@@ -13,7 +13,7 @@ class LogCenterErrorDetailView extends StatelessWidget {
   /// Log browser controller.
   final ScriptLogBrowserController controller;
 
-  /// Vertical scroll controller for the detail page.
+  /// Vertical scroll controller for the detail log list.
   final ScrollController detailScrollController;
 
   /// Horizontal scroll controller for non-wrapped detail log text.
@@ -26,67 +26,12 @@ class LogCenterErrorDetailView extends StatelessWidget {
       if (detail == null) {
         return _buildLoading(context);
       }
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildHeader(
-            context,
-            _formatDetailTime(detail),
-            trailing: _buildScrollToBottomButton(),
-          ),
-          const SizedBox(height: 8),
-          Expanded(child: _buildBody(context, detail)),
-        ],
+      return _buildDetailScrollView(
+        context,
+        detail,
+        title: _formatDetailTime(detail),
       );
     });
-  }
-
-  /// Builds the detail scroll area with optional line wrapping.
-  Widget _buildBody(BuildContext context, ScriptErrorLogDetail detail) {
-    return Obx(() {
-      final wrapLines = controller.wrapLines.value;
-      return Scrollbar(
-        controller: detailScrollController,
-        thumbVisibility: true,
-        child: ListView(
-          controller: detailScrollController,
-          padding: const EdgeInsets.only(right: 12),
-          children: [
-            _buildImages(context, detail),
-            const SizedBox(height: 12),
-            _buildLogText(detail, wrapLines),
-          ],
-        ),
-      );
-    });
-  }
-
-  /// Builds wrapped or horizontally-scrollable error log text.
-  Widget _buildLogText(ScriptErrorLogDetail detail, bool wrapLines) {
-    if (wrapLines) {
-      return LogCenterLogText(
-        line: detail.log.content,
-        maxLines: null,
-        overflow: TextOverflow.clip,
-        softWrap: true,
-      );
-    }
-    return Scrollbar(
-      controller: detailHorizontalScrollController,
-      thumbVisibility: true,
-      notificationPredicate: (notification) {
-        return notification.metrics.axis == Axis.horizontal;
-      },
-      child: SingleChildScrollView(
-        controller: detailHorizontalScrollController,
-        scrollDirection: Axis.horizontal,
-        child: LogCenterLogText(
-          line: detail.log.content,
-          maxLines: null,
-          overflow: TextOverflow.visible,
-        ),
-      ),
-    );
   }
 
   /// Builds detail header while data is still loading.
@@ -132,24 +77,50 @@ class LogCenterErrorDetailView extends StatelessWidget {
     );
   }
 
-  /// Builds image previews for the selected error.
-  Widget _buildImages(BuildContext context, ScriptErrorLogDetail detail) {
-    final images = detail.images.take(3).toList();
-    if (images.isEmpty) {
+  /// Builds the image strip for the selected error detail.
+  Widget _buildImages(ScriptErrorLogDetail detail) {
+    if (detail.images.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: images
-          .map(
-            (image) => LogCenterErrorImageCard(
-              controller: controller,
-              detail: detail,
-              image: image,
-            ),
-          )
-          .toList(),
+    return SizedBox(
+      height: 156,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: detail.images.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          return LogCenterErrorImageCard(
+            controller: controller,
+            detail: detail,
+            image: detail.images[index],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Builds the unified vertical scroll view for the whole detail page.
+  Widget _buildDetailScrollView(
+    BuildContext context,
+    ScriptErrorLogDetail detail, {
+    required String title,
+  }) {
+    return CustomScrollView(
+      controller: detailScrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildHeader(
+            context,
+            title,
+            trailing: _buildScrollToBottomButton(),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 8)),
+        SliverToBoxAdapter(child: _buildImages(detail)),
+        if (detail.images.isNotEmpty)
+          const SliverToBoxAdapter(child: SizedBox(height: 6)),
+        ..._buildLogSlivers(context),
+      ],
     );
   }
 
@@ -158,7 +129,7 @@ class LogCenterErrorDetailView extends StatelessWidget {
     return controller.formatErrorTimestamp(detail.timestampMs, detail.time);
   }
 
-  /// Resolves a title for the currently selected error.
+  /// Resolves one title for the current selected error.
   String _selectedErrorTitle() {
     final selectedId = controller.selectedErrorId.value;
     final index = controller.errorItems.indexWhere((item) {
@@ -173,7 +144,7 @@ class LogCenterErrorDetailView extends StatelessWidget {
     return controller.formatErrorTimestamp(item.timestampMs, item.time);
   }
 
-  /// Scrolls the vertical detail viewport to the current bottom edge.
+  /// Scrolls the detail log viewport to the current bottom edge.
   void _scrollDetailToBottom() {
     if (!detailScrollController.hasClients) {
       return;
