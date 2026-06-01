@@ -6,6 +6,14 @@ extension _LogCenterErrorDetailLogSectionX on LogCenterErrorDetailView {
     final lines = controller.selectedErrorLogLines;
     final preparing = controller.errorLogPreparing.value;
     if (lines.isEmpty) {
+      if (controller.errorMessage.value.isNotEmpty) {
+        return [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: Text(controller.errorMessage.value)),
+          ),
+        ];
+      }
       if (preparing) {
         return const [
           SliverFillRemaining(
