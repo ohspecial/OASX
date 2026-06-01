@@ -40,10 +40,11 @@ class I18n {
   static const String killOasServer = 'Kill OAS server',
       areYouSureKill = 'Are you sure kill OAS server',
       killServerSuccess = 'Kill server success';
-  static const String killServerFailure = 'Kill server failure',
-      killServerFailureMsg =
-          'Please check if the OAS service is turned off and then manually log out',
-      findOasNewVersion = 'Find OAS new version';
+  static const String
+  killServerFailure = 'Kill server failure',
+  killServerFailureMsg =
+      'Please check if the OAS service is turned off and then manually log out',
+  findOasNewVersion = 'Find OAS new version';
   static const String oasLatestVersion = 'OAS latest version',
       currentBranch = 'Current branch',
       detailedSubmissionHistory = 'Detailed submission history';
@@ -67,6 +68,7 @@ class I18n {
       rename = 'Rename';
   static const String delete = 'Delete', cancel = 'Cancel', confirm = 'Confirm';
   static const String retry = 'Retry',
+      back = 'Back',
       selectAll = 'Select all',
       clear = 'Clear';
   static const String selectedCount = 'Selected count',
@@ -174,11 +176,10 @@ class I18n {
       homeStatsRunDetails = 'home_stats_run_details';
   static const String homeStatsSelectedBlock = 'home_stats_selected_block',
       homeStatsLoadingMessage = 'home_stats_loading_message';
-  static const String homeStatsSummaryRunDuration =
-          'home_stats_summary_run_duration',
-      homeStatsSummaryRunTaskCount = 'home_stats_summary_run_task_count',
-      homeStatsSummaryTotalBattleCount =
-          'home_stats_summary_total_battle_count';
+  static const String
+  homeStatsSummaryRunDuration = 'home_stats_summary_run_duration',
+  homeStatsSummaryRunTaskCount = 'home_stats_summary_run_task_count',
+  homeStatsSummaryTotalBattleCount = 'home_stats_summary_total_battle_count';
   static const String homeStatsSortByData = 'home_stats_sort_by_data',
       homeStatsSortByTime = 'home_stats_sort_by_time',
       homeStatsNoBattle = 'home_stats_no_battle';
@@ -200,6 +201,12 @@ class I18n {
   static const String homeLogAutoScroll = 'home_log_auto_scroll',
       homeLogLoadOlder = 'home_log_load_older',
       homeLogEmptyFiltered = 'home_log_empty_filtered';
+  static const String homeLogInfoTab = 'home_log_info_tab',
+      homeLogErrorTab = 'home_log_error_tab',
+      homeLogNoErrors = 'home_log_no_errors';
+  static const String homeLogImages = 'home_log_images',
+      homeLogSelectError = 'home_log_select_error',
+      homeLogDownloadImage = 'home_log_download_image';
   static const String taskManage = 'task_manage',
       taskManageTitle = 'task_manage_title',
       taskSearchHint = 'task_search_hint';

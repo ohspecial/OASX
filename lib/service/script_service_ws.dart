@@ -5,13 +5,6 @@ extension ScriptServiceWsX on ScriptService {
     if (!scriptModelMap.containsKey(name)) {
       addScriptModel(name);
     }
-    if (!Get.isRegistered<ScriptLogController>(tag: name)) {
-      Get.put(
-        ScriptLogController(name: name),
-        tag: name,
-        permanent: true,
-      );
-    }
     wsService.removeAllListeners(name);
     final client = await wsService.connect(
       name: name,
@@ -35,14 +28,6 @@ extension ScriptServiceWsX on ScriptService {
       return;
     }
     if (!message.startsWith('{') || !message.endsWith('}')) {
-      if (!Get.isRegistered<ScriptLogController>(tag: name)) {
-        Get.put(
-          ScriptLogController(name: name),
-          tag: name,
-          permanent: true,
-        );
-      }
-      Get.find<ScriptLogController>(tag: name).addLog(message);
       return;
     }
     final data = jsonDecode(message) as Map<String, dynamic>;

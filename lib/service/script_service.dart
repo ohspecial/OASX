@@ -14,6 +14,7 @@ import 'package:oasx/utils/extension_utils.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:oasx/utils/time_utils.dart';
 import 'package:oasx/modules/log/script_log_controller.dart';
+import 'package:oasx/modules/log/script_log_browser_controller.dart';
 
 part 'script_service_ws.dart';
 part 'script_service_auto.dart';
@@ -41,11 +42,14 @@ class ScriptService extends GetxService {
   @override
   Future<void> onClose() async {
     await Future.wait([
-      ...scriptModelMap.keys.map((e) => Future.wait([
-            stopScript(e),
-            wsService.close(e),
-            Get.delete<ScriptLogController>(tag: e, force: true),
-          ])),
+      ...scriptModelMap.keys.map(
+        (e) => Future.wait([
+          stopScript(e),
+          wsService.close(e),
+          Get.delete<ScriptLogController>(tag: e, force: true),
+          Get.delete<ScriptLogBrowserController>(tag: e, force: true),
+        ]),
+      ),
     ]);
     scriptModelMap.clear();
     super.onClose();
@@ -84,8 +88,10 @@ class ScriptService extends GetxService {
   }
 
   void syncScriptOrder(Iterable<String> scripts) {
-    final normalized =
-        scripts.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final normalized = scripts
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     scriptOrderList.value = normalized;
     for (final name in normalized) {
       if (!scriptModelMap.containsKey(name)) {
@@ -93,8 +99,9 @@ class ScriptService extends GetxService {
       }
     }
     final validSet = normalized.toSet();
-    final stale =
-        scriptModelMap.keys.where((e) => !validSet.contains(e)).toList();
+    final stale = scriptModelMap.keys
+        .where((e) => !validSet.contains(e))
+        .toList();
     for (final name in stale) {
       deleteScriptModel(name);
     }
@@ -160,6 +167,11 @@ class ScriptService extends GetxService {
       if (Get.isRegistered<ScriptLogController>(tag: name)) {
         try {
           Get.delete<ScriptLogController>(tag: name, force: true);
+        } catch (_) {}
+      }
+      if (Get.isRegistered<ScriptLogBrowserController>(tag: name)) {
+        try {
+          Get.delete<ScriptLogBrowserController>(tag: name, force: true);
         } catch (_) {}
       }
     }

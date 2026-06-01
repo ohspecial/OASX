@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -8,6 +10,7 @@ import 'package:oasx/api/api_interceptor.dart';
 import 'package:oasx/config/constants.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/modules/home/models/script_statistics_models.dart';
+import 'package:oasx/modules/log/log_browser_models.dart';
 import 'package:oasx/translation/i18n.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/api/github_release_model.dart';
@@ -20,6 +23,7 @@ part 'api_client_menu_config.dart';
 part 'api_client_script.dart';
 part 'api_client_feedback.dart';
 part 'api_client_statistics.dart';
+part 'api_client_logs.dart';
 
 class ApiResult<T> {
   ApiResult({this.data, this.error, this.code});
@@ -30,9 +34,7 @@ class ApiResult<T> {
 
   bool get isSuccess => error == null || error!.isEmpty;
 
-  ApiResult.success(this.data)
-      : error = null,
-        code = null;
+  ApiResult.success(this.data) : error = null, code = null;
 
   ApiResult.failure(this.error, [this.code]) : data = null;
 
@@ -55,11 +57,7 @@ class ApiResult<T> {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'data': data,
-      'error': error,
-      'code': code,
-    };
+    return {'data': data, 'error': error, 'code': code};
   }
 }
 
@@ -74,8 +72,9 @@ class ApiClient {
   ApiClient._internal() {
     final temporaryDirectory =
         GetStorage().read(StorageKey.temporaryDirectory.name) ?? '';
-    final cacheStore =
-        kIsWeb ? MemCacheStore() : FileCacheStore(temporaryDirectory);
+    final cacheStore = kIsWeb
+        ? MemCacheStore()
+        : FileCacheStore(temporaryDirectory);
     _cacheOptions = CacheOptions(
       store: cacheStore,
       policy: CachePolicy.request,
@@ -89,11 +88,7 @@ class ApiClient {
     NetOptions.instance
         .setConnectTimeout(const Duration(seconds: 3))
         .enableLogger(false)
-        .addInterceptor(
-          DioCacheInterceptor(
-            options: _cacheOptions,
-          ),
-        )
+        .addInterceptor(DioCacheInterceptor(options: _cacheOptions))
         .addInterceptor(ApiInterceptor())
         .create();
     setAddress(_defaultAddress);
@@ -106,8 +101,9 @@ class ApiClient {
   void setAddress(String address) {
     final normalized = address.trim();
     this.address = normalized;
-    NetOptions.instance.dio.options.baseUrl =
-        normalized.isEmpty ? _defaultAddress : normalized;
+    NetOptions.instance.dio.options.baseUrl = normalized.isEmpty
+        ? _defaultAddress
+        : normalized;
   }
 
   void resetAddress() {
@@ -144,8 +140,10 @@ class ApiClient {
   }
 
   Future<bool> killServer() async {
-    final res =
-        await request(() => get('/home/kill_server'), onError: (msg, code) {});
+    final res = await request(
+      () => get('/home/kill_server'),
+      onError: (msg, code) {},
+    );
     return res.isSuccess && res.data == 'success';
   }
 
@@ -175,10 +173,7 @@ class ApiClient {
 
   Future<ApiResult<GithubReleaseModel>> getGithubReleaseResult() async {
     final res = await request<GithubReleaseModel>(
-      () => get(
-        updateUrlGithub,
-        decodeType: GithubReleaseModel(),
-      ),
+      () => get(updateUrlGithub, decodeType: GithubReleaseModel()),
     );
     return res;
   }
@@ -215,10 +210,7 @@ class ApiClient {
 
   Future<bool> putChineseTranslate() async {
     final res = await request(
-      () => put(
-        '/home/chinese_translate',
-        data: Messages().all_cn_translate,
-      ),
+      () => put('/home/chinese_translate', data: Messages().all_cn_translate),
     );
     return res.isSuccess && res.data == true;
   }

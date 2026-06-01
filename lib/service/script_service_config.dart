@@ -42,7 +42,7 @@ extension ScriptServiceConfigX on ScriptService {
     await connectScript(normalized);
   }
 
-  /// Clears one config websocket, log controller, and cached model state.
+  /// Clears one config websocket, log controllers, and cached model state.
   Future<void> _disposeConfigRuntime(String configName) async {
     final normalized = configName.trim();
     if (normalized.isEmpty) {
@@ -52,6 +52,11 @@ extension ScriptServiceConfigX on ScriptService {
     if (Get.isRegistered<ScriptLogController>(tag: normalized)) {
       try {
         Get.delete<ScriptLogController>(tag: normalized, force: true);
+      } catch (_) {}
+    }
+    if (Get.isRegistered<ScriptLogBrowserController>(tag: normalized)) {
+      try {
+        Get.delete<ScriptLogBrowserController>(tag: normalized, force: true);
       } catch (_) {}
     }
     scriptModelMap.remove(normalized);
