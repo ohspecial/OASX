@@ -40,6 +40,7 @@ class DeployYamlEditor extends StatefulWidget {
 
 class _DeployYamlEditorState extends State<DeployYamlEditor> {
   late DeployYamlDocument _document;
+  late String _savedContent;
   final Map<int, TextEditingController> _controllers = {};
   final Map<int, FocusNode> _focusNodes = {};
   final Set<int> _collapsedSections = {};
@@ -47,6 +48,7 @@ class _DeployYamlEditorState extends State<DeployYamlEditor> {
   @override
   void initState() {
     super.initState();
+    _savedContent = widget.content;
     _loadDocument();
     widget.controller?._attach(this);
   }
@@ -59,6 +61,7 @@ class _DeployYamlEditorState extends State<DeployYamlEditor> {
       widget.controller?._attach(this);
     }
     if (oldWidget.content != widget.content) {
+      _savedContent = widget.content;
       _disposeInputs();
       _collapsedSections.clear();
       _loadDocument();
@@ -128,6 +131,7 @@ class _DeployYamlEditorState extends State<DeployYamlEditor> {
     setState(() {
       _document.updateValue(line.index, value);
     });
+    widget.controller?._notifyStateChanged();
   }
 
   bool _isCollapsed(DeployYamlNode node) {
@@ -147,8 +151,11 @@ class _DeployYamlEditorState extends State<DeployYamlEditor> {
   }
 
   void _saveYaml() {
-    widget.onSave(_document.serialize());
+    final yaml = _document.serialize();
+    widget.onSave(yaml);
+    _savedContent = yaml;
     widget.controller?.onSave?.call();
+    widget.controller?._notifyStateChanged();
   }
 
   void _disposeInputs() {
@@ -175,6 +182,15 @@ class DeployYamlEditorController {
         state._document.hasEditableValues;
   }
 
+  /// Returns whether the editor contains changes not written to deploy.yaml.
+  bool get hasUnsavedChanges {
+    final state = _state;
+    if (state == null || state._document.hasError) {
+      return false;
+    }
+    return state._document.serialize() != state._savedContent;
+  }
+
   /// Called when YAML text is copied.
   void Function(String yaml)? onCopy;
 
@@ -189,6 +205,10 @@ class DeployYamlEditorController {
 
   /// Saves current YAML text through the editor save callback.
   void save() => _state?._saveYaml();
+
+  void _notifyStateChanged() {
+    onStateChanged?.call();
+  }
 
   void _attach(_DeployYamlEditorState state) {
     _state = state;

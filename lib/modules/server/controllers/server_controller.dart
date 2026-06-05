@@ -131,6 +131,28 @@ class ServerController extends GetxController with LogMixin {
     }
   }
 
+  /// Exports the saved deploy.yaml file to a user-selected path.
+  bool exportDeployFile(String targetPath) {
+    if (targetPath.trim().isEmpty) {
+      return false;
+    }
+    final sourcePath = '${rootPathServer.value}\\config\\deploy.yaml';
+    final normalizedTarget = targetPath.toLowerCase().endsWith('.yaml')
+        ? targetPath
+        : '$targetPath.yaml';
+    try {
+      final source = File(sourcePath);
+      if (!source.existsSync()) {
+        return false;
+      }
+      source.copySync(normalizedTarget);
+      return true;
+    } catch (e) {
+      deployContent.value = 'Error exporting file: $e';
+      return false;
+    }
+  }
+
   String get pathGit => '${rootPathServer.value}\\toolkit\\Git\\mingw64\\bin"';
   String get pathPython => '${rootPathServer.value}\\toolkit';
   String get pathAdb =>

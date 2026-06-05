@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -46,8 +47,10 @@ class _DeploySectionPanelState extends State<DeploySectionPanel> {
               authenticated: authenticated,
               collapsed: _collapsed,
               canSave: authenticated && _editorController.canSave,
+              canExport: authenticated && !_editorController.hasUnsavedChanges,
               onToggle: _toggleCollapsed,
               onImport: _showImportDialog,
+              onExport: _exportDeployFile,
               onCopy: _editorController.copy,
               onSave: _editorController.save,
             ),
@@ -95,6 +98,24 @@ class _DeploySectionPanelState extends State<DeploySectionPanel> {
     Get.dialog(const DeployImportDialog());
   }
 
+  Future<void> _exportDeployFile() async {
+    final path = await FilePicker.platform.saveFile(
+      fileName: 'deploy.yaml',
+      type: FileType.custom,
+      allowedExtensions: const ['yaml'],
+    );
+    if (path == null || path.trim().isEmpty) {
+      return;
+    }
+    final success = Get.find<ServerController>().exportDeployFile(path);
+    Get.snackbar(
+      I18n.tip.tr,
+      success
+          ? I18n.deployFileExportSuccess.tr
+          : I18n.deployFileExportFailed.tr,
+    );
+  }
+
   void _refreshHeader() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -109,8 +130,10 @@ class _DeploySectionHeader extends StatelessWidget {
     required this.authenticated,
     required this.collapsed,
     required this.canSave,
+    required this.canExport,
     required this.onToggle,
     required this.onImport,
+    required this.onExport,
     required this.onCopy,
     required this.onSave,
   });
@@ -118,8 +141,10 @@ class _DeploySectionHeader extends StatelessWidget {
   final bool authenticated;
   final bool collapsed;
   final bool canSave;
+  final bool canExport;
   final VoidCallback onToggle;
   final VoidCallback onImport;
+  final VoidCallback onExport;
   final VoidCallback onCopy;
   final VoidCallback onSave;
 
@@ -145,8 +170,14 @@ class _DeploySectionHeader extends StatelessWidget {
                   ),
             ).paddingOnly(right: 8),
           IconButton(
-            icon: const Icon(Icons.file_upload_outlined, size: 18),
+            tooltip: I18n.importDeployFile.tr,
+            icon: const Icon(Icons.file_download_outlined, size: 18),
             onPressed: authenticated ? onImport : null,
+          ),
+          IconButton(
+            tooltip: I18n.exportDeployFile.tr,
+            icon: const Icon(Icons.file_upload_outlined, size: 18),
+            onPressed: canExport ? onExport : null,
           ),
           IconButton(
             icon: const Icon(Icons.content_copy_rounded, size: 18),

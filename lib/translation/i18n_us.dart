@@ -40,10 +40,13 @@ final Map<String, String> _us_ui = {
   I18n.installOasHelp:
       'This will download and decompress from Github. Please maintain a stable network connection. At the same time, this directory will be cleared',
   I18n.importDeployFile: 'Import deploy file',
+  I18n.exportDeployFile: 'Export deploy file',
   I18n.selectDeployFile: 'Click to select or drop a YAML file here',
   I18n.deployFileNameInvalid: 'The imported file must be a .yaml file',
   I18n.deployFileImportSuccess: 'Deploy file imported',
   I18n.deployFileImportFailed: 'Failed to import deploy file',
+  I18n.deployFileExportSuccess: 'Deploy file exported',
+  I18n.deployFileExportFailed: 'Failed to export deploy file',
   I18n.configUpdateTip:
       'The current script is running, please stop it before making modifications.',
   I18n.minimizeToSystemTrayHelp:
