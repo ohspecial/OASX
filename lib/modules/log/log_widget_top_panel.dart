@@ -27,21 +27,24 @@ class TopLogPanel extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.left,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Spacer(),
-              if (enableAutoScroll ?? true) _autoScrollButton(),
-              if (enableCopy ?? true) _copyButton(),
-              if (enableClear ?? true) _deleteButton(),
-              if (enableCollapse ?? true) _collapseButton(),
-            ],
-          ).paddingAll(8).constrained(height: 48),
+          InkWell(
+            onTap: (enableCollapse ?? true) ? controller.toggleCollapse : null,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                if (enableAutoScroll ?? true) _autoScrollButton(),
+                if (enableCopy ?? true) _copyButton(),
+                if (enableClear ?? true) _deleteButton(),
+                if (enableCollapse ?? true) _collapseButton(),
+              ],
+            ).paddingAll(8).constrained(height: 48),
+          ),
           if (bottomChild != null) ...[
             const Divider(height: 1),
             bottomChild!,

@@ -1,4 +1,3 @@
-import 'package:code_editor/code_editor.dart';
 import 'package:expansion_tile_group/expansion_tile_group.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:styled_widget/styled_widget.dart';
 import 'package:oasx/modules/common/widgets/appbar.dart';
 import 'package:oasx/modules/log/log_widget.dart';
 import 'package:oasx/modules/server/controllers/server_controller.dart';
+import 'package:oasx/modules/server/widgets/deploy_section_panel.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
 class ServerView extends StatelessWidget {
@@ -18,34 +18,32 @@ class ServerView extends StatelessWidget {
     return Scaffold(
       appBar: buildPlatformAppBar(context, routePath: '/server'),
       floatingActionButton: _buildStartServerButton(),
-      body: _buildBody(),
-    );
-  }
-
-  Widget _buildBody() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final serverController = Get.find<ServerController>();
-        return SingleChildScrollView(
-          child: Column(
-            spacing: 6,
-            children: [
-              ExpansionTileGroup(
-                toggleType: ToggleType.expandOnlyCurrent,
-                children: [
-                  _buildPathSection(context),
-                  _buildDeploySection(constraints.maxHeight - 200, context),
-                ],
-              ),
-              LogWidget(
-                key: ValueKey(serverController.hashCode),
-                controller: serverController,
-                title: I18n.setupLog.tr,
-              ).constrained(height: constraints.maxHeight - 200),
-            ],
-          ).padding(right: 10, left: 10),
-        );
-      },
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final serverController = Get.find<ServerController>();
+          return SingleChildScrollView(
+            child: Column(
+              spacing: 6,
+              children: [
+                ExpansionTileGroup(
+                  toggleType: ToggleType.expandOnlyCurrent,
+                  children: [
+                    _buildPathSection(context),
+                  ],
+                ),
+                DeploySectionPanel(
+                  maxHeight: constraints.maxHeight - 200,
+                ),
+                LogWidget(
+                  key: ValueKey(serverController.hashCode),
+                  controller: serverController,
+                  title: I18n.setupLog.tr,
+                ).constrained(height: constraints.maxHeight - 200),
+              ],
+            ).padding(right: 10, left: 10),
+          );
+        },
+      ),
     );
   }
 
@@ -101,31 +99,6 @@ class ServerView extends StatelessWidget {
     );
   }
 
-  ExpansionTileItem _buildDeploySection(
-    double maxHeight,
-    BuildContext context,
-  ) {
-    return ExpansionTileItem(
-      initiallyExpanded: false,
-      isHasTopBorder: false,
-      isHasBottomBorder: false,
-      collapsedBackgroundColor: Theme.of(context)
-          .colorScheme
-          .secondaryContainer
-          .withValues(alpha: 0.24),
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-      title: Text(
-        I18n.setupDeploy.tr,
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      children: [
-        SingleChildScrollView(
-          child: _buildCodeEditor(maxHeight - 50),
-        ).constrained(height: maxHeight),
-      ],
-    );
-  }
-
   Widget _buildStartServerButton() {
     return GetX<ServerController>(builder: (controller) {
       if (!controller.rootPathAuthenticated.value) {
@@ -157,26 +130,4 @@ class ServerView extends StatelessWidget {
     });
   }
 
-  Widget _buildCodeEditor(double maxHeight) {
-    return GetX<ServerController>(builder: (controller) {
-      final file = FileEditor(
-        name: 'deploy.yaml',
-        language: 'yaml',
-        code: controller.deployContent.value,
-      );
-      final model = EditorModel(
-        files: [file],
-        styleOptions: EditorModelStyleOptions(
-          heightOfContainer: maxHeight,
-        ),
-      );
-      return CodeEditor(
-        model: model,
-        formatters: const ['yaml'],
-        onSubmit: (language, value) {
-          controller.writeDeploy(value);
-        },
-      );
-    });
-  }
 }

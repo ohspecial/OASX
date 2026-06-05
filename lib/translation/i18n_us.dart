@@ -39,6 +39,11 @@ final Map<String, String> _us_ui = {
       'OASX and OAS are two different things. Do not confuse them, do not put them in the same directory, do not use spaces, do not use Chinese characters, and do not use overly long paths',
   I18n.installOasHelp:
       'This will download and decompress from Github. Please maintain a stable network connection. At the same time, this directory will be cleared',
+  I18n.importDeployFile: 'Import deploy file',
+  I18n.selectDeployFile: 'Click to select or drop a YAML file here',
+  I18n.deployFileNameInvalid: 'The imported file must be a .yaml file',
+  I18n.deployFileImportSuccess: 'Deploy file imported',
+  I18n.deployFileImportFailed: 'Failed to import deploy file',
   I18n.configUpdateTip:
       'The current script is running, please stop it before making modifications.',
   I18n.minimizeToSystemTrayHelp:

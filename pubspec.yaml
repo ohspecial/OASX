@@ -74,6 +74,7 @@ dependencies:
   fl_chart: ^0.71.0 # 图表
   intl: ^0.20.2
   crypto: ^3.0.6
+  super_drag_and_drop: ^0.7.0
 
 flutter_launcher_icons:
   android: true

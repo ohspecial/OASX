@@ -65,6 +65,11 @@ class I18n {
       installOasHelp = 'Install OAS from local';
   static const String setupDeploy = 'Setup deploy',
       setupLog = 'Setup log',
+      importDeployFile = 'import_deploy_file',
+      selectDeployFile = 'select_deploy_file',
+      deployFileNameInvalid = 'deploy_file_name_invalid',
+      deployFileImportSuccess = 'deploy_file_import_success',
+      deployFileImportFailed = 'deploy_file_import_failed',
       rename = 'Rename';
   static const String delete = 'Delete', cancel = 'Cancel', confirm = 'Confirm';
   static const String retry = 'Retry',

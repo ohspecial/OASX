@@ -3,7 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  irondash_engine_context
   screen_retriever_linux
+  super_native_extensions
   system_tray
   url_launcher_linux
   window_manager

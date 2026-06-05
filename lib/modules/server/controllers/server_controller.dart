@@ -111,6 +111,26 @@ class ServerController extends GetxController with LogMixin {
     }
   }
 
+  /// Imports one YAML file into the current OAS deploy config path.
+  bool importDeployFile(String sourcePath) {
+    final source = File(sourcePath);
+    if (!source.existsSync()) {
+      return false;
+    }
+    if (!sourcePath.toLowerCase().endsWith('.yaml')) {
+      return false;
+    }
+    final targetPath = '${rootPathServer.value}\\config\\deploy.yaml';
+    try {
+      source.copySync(targetPath);
+      readDeploy();
+      return true;
+    } catch (e) {
+      deployContent.value = 'Error importing file: $e';
+      return false;
+    }
+  }
+
   String get pathGit => '${rootPathServer.value}\\toolkit\\Git\\mingw64\\bin"';
   String get pathPython => '${rootPathServer.value}\\toolkit';
   String get pathAdb =>
