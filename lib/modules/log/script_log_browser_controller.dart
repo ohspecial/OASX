@@ -68,7 +68,7 @@ class ScriptLogBrowserController extends GetxController {
   final autoScroll = true.obs;
 
   /// Whether long log lines should wrap in the viewport.
-  final wrapLines = false.obs;
+  final wrapLines = true.obs;
 
   /// Error log list items.
   final errorItems = <ScriptErrorLogItem>[].obs;
