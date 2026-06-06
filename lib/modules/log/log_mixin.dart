@@ -145,6 +145,39 @@ mixin LogMixin on GetxController {
     _pendingLogs.add(log);
   }
 
+  /// Adds a log or replaces the latest matching pending/UI log.
+  void upsertLog(String log, bool Function(String log) shouldReplace) {
+    final pendingUpdated = _replaceLatestLog(_pendingLogs, log, shouldReplace);
+    if (pendingUpdated) {
+      return;
+    }
+    final logsUpdated = _replaceLatestLog(logs, log, shouldReplace);
+    final archivedUpdated = _replaceLatestLog(archivedLogs, log, shouldReplace);
+    if (logsUpdated) {
+      logs.refresh();
+    }
+    if (archivedUpdated) {
+      archivedLogs.refresh();
+    }
+    if (!logsUpdated && !archivedUpdated) {
+      addLog(log);
+    }
+  }
+
+  bool _replaceLatestLog(
+    List<String> target,
+    String log,
+    bool Function(String log) shouldReplace,
+  ) {
+    for (var index = target.length - 1; index >= 0; index--) {
+      if (shouldReplace(target[index])) {
+        target[index] = log;
+        return true;
+      }
+    }
+    return false;
+  }
+
   void clearLog() {
     logs.clear();
     archivedLogs.clear();

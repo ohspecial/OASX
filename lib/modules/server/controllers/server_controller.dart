@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:get/get.dart';
@@ -8,11 +9,16 @@ import 'package:oasx/api/api_client.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/log/log_mixin.dart';
+import 'package:oasx/modules/server/models/deploy_git_prefetcher.dart';
+import 'package:oasx/modules/server/models/deploy_python_config.dart';
 import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/script_service.dart';
 
 class ServerController extends GetxController with LogMixin {
+  @override
+  int get maxLines => 1000;
+
   final rootPathServer = ''.obs;
   final rootPathAuthenticated = true.obs;
   final showDeploy = true.obs;
@@ -22,10 +28,15 @@ class ServerController extends GetxController with LogMixin {
   final _storage = GetStorage();
   Shell? shell;
   var shellController = ShellLinesController();
+  var shellErrorController = ShellLinesController();
+
+  /// Tracks whether taskkill already reported that pythonw.exe is absent.
+  var _pythonwNotRunningLogged = false;
 
   @override
   void onInit() {
-    rootPathServer.value = _storage.read(StorageKey.rootPathServer.name) ??
+    rootPathServer.value =
+        _storage.read(StorageKey.rootPathServer.name) ??
         'Please set OAS root path';
     autoLoginAfterDeploy.value =
         _storage.read(StorageKey.autoLoginAfterDeploy.name) ?? false;
@@ -33,6 +44,7 @@ class ServerController extends GetxController with LogMixin {
     shellController.stream.listen(
       (event) => addLog(!event.contains('INFO') ? 'INFO: $event' : event),
     );
+    shellErrorController.stream.listen(_addShellErrorLine);
     rootPathAuthenticated.value = authenticatePath(rootPathServer.value);
     if (rootPathAuthenticated.value) {
       readDeploy();
@@ -44,9 +56,10 @@ class ServerController extends GetxController with LogMixin {
     rootPathAuthenticated.value = authenticatePath(value);
     rootPathServer.value = value;
     shell = getShell;
-    Get.find<SettingsController>()
-        .storage
-        .write(StorageKey.rootPathServer.name, rootPathServer.value);
+    Get.find<SettingsController>().storage.write(
+      StorageKey.rootPathServer.name,
+      rootPathServer.value,
+    );
     if (rootPathAuthenticated.value) {
       readDeploy();
     }
@@ -59,20 +72,21 @@ class ServerController extends GetxController with LogMixin {
       if (!rootDir.existsSync()) {
         return false;
       }
-      final python = File('${rootDir.path}/toolkit/python.exe');
+      final deploy = File('${rootDir.path}/config/deploy.yaml');
+      if (!deploy.existsSync()) {
+        return false;
+      }
+      final pythonConfig = DeployPythonConfig.read(rootDir.path);
+      final python = File(pythonConfig.getPythonPath(rootDir.path));
       if (!python.existsSync()) {
         return false;
       }
-      final git = File('${rootDir.path}/toolkit/Git/cmd/git.exe');
+      final git = File('${rootDir.path}/toolkit/Git/mingw64/bin/git.exe');
       if (!git.existsSync()) {
         return false;
       }
       final installer = File('${rootDir.path}/deploy/installer.py');
       if (!installer.existsSync()) {
-        return false;
-      }
-      final deploy = File('${rootDir.path}/config/deploy.yaml');
-      if (!deploy.existsSync()) {
         return false;
       }
     } catch (e) {
@@ -153,31 +167,118 @@ class ServerController extends GetxController with LogMixin {
     }
   }
 
-  String get pathGit => '${rootPathServer.value}\\toolkit\\Git\\mingw64\\bin"';
+  String get pathGit => '${rootPathServer.value}\\toolkit\\Git\\mingw64\\bin';
   String get pathPython => '${rootPathServer.value}\\toolkit';
   String get pathAdb =>
       '${rootPathServer.value}\\toolkit\\Lib\\site-packages\\adbutils\\binaries';
   String get pathScripts => '${rootPathServer.value}\\toolkit\\Scripts';
+  String get pathSeparator => Platform.isWindows ? ';' : ':';
   Map<String, String> get pathPATH => {
-        'PATH':
-            '${rootPathServer.value},$pathGit,$pathPython,$pathAdb,$pathScripts'
-      };
+    'PATH': [
+      rootPathServer.value,
+      pathGit,
+      pathPython,
+      pathAdb,
+      pathScripts,
+    ].join(pathSeparator),
+  };
 
   Shell get getShell => Shell(
-        workingDirectory: rootPathServer.value,
-        runInShell: true,
-        environment: pathPATH,
-        stdout: shellController.sink,
-        verbose: false,
-      );
+    workingDirectory: rootPathServer.value,
+    runInShell: true,
+    environment: pathPATH,
+    stdout: shellController.sink,
+    stderr: shellErrorController.sink,
+    verbose: false,
+  );
 
-  Future<void> runShell(String command) async {
-    try {
-      final result = await shell!.run(command);
-      printInfo(info: result.errText);
-    } on ShellException catch (e) {
-      addLog('ERROR: ${e.toString()}');
+  /// Runs one shell command and records failures with the requested severity.
+  Future<bool> runShell(
+    String command, {
+    bool allowFailure = false,
+    bool ignorePythonwNotRunning = false,
+  }) async {
+    if (ignorePythonwNotRunning) {
+      _pythonwNotRunningLogged = false;
     }
+    try {
+      await shell!.run(command);
+      return true;
+    } on ShellException catch (e) {
+      if (ignorePythonwNotRunning && _isPythonwNotRunningException(e)) {
+        if (!_pythonwNotRunningLogged) {
+          addLog('WARNING: pythonw.exe is not running, skip taskkill');
+        }
+        return true;
+      }
+      _addShellExceptionLog(e, allowFailure: allowFailure);
+      return false;
+    }
+  }
+
+  /// Adds a shell exception using info or error severity.
+  void _addShellExceptionLog(
+    ShellException exception, {
+    required bool allowFailure,
+  }) {
+    final prefix = allowFailure ? 'INFO' : 'ERROR';
+    addLog('$prefix: ${exception.toString()}');
+  }
+
+  /// Detects the taskkill exit code used when pythonw.exe is absent.
+  bool _isPythonwNotRunningException(ShellException exception) {
+    final lower = exception.message.toLowerCase();
+    return exception.result?.exitCode == 128 &&
+        lower.contains('taskkill') &&
+        lower.contains('pythonw.exe');
+  }
+
+  void _addShellErrorLine(String line) {
+    final lower = line.toLowerCase();
+    final expectedTaskKillOutput = _isExpectedTaskKillOutput(lower);
+    if (expectedTaskKillOutput) {
+      _pythonwNotRunningLogged = true;
+      final message = line.replaceFirst(
+        RegExp(r'^\s*ERROR:\s*', caseSensitive: false),
+        '',
+      );
+      addLog('WARNING: $message');
+      return;
+    }
+    if (_isGitProgressLine(lower)) {
+      upsertLog('INFO: $line', _isGitProgressLog);
+      return;
+    }
+    final isError = lower.contains('fatal:') || lower.contains('error:');
+    addLog('${isError ? 'ERROR' : 'INFO'}: $line');
+  }
+
+  /// Detects taskkill output when no pythonw.exe process is running.
+  bool _isExpectedTaskKillOutput(String lowerLine) {
+    return lowerLine.contains('pythonw.exe') &&
+        (lowerLine.contains('not found') || lowerLine.contains('没有找到'));
+  }
+
+  bool _isGitProgressLine(String lowerLine) {
+    return lowerLine.startsWith('remote: enumerating objects:') ||
+        lowerLine.startsWith('remote: counting objects:') ||
+        lowerLine.startsWith('remote: compressing objects:') ||
+        lowerLine.startsWith('receiving objects:') ||
+        lowerLine.startsWith('resolving deltas:') ||
+        lowerLine.startsWith('updating files:');
+  }
+
+  bool _isGitProgressLog(String log) {
+    return _isGitProgressLine(log.replaceFirst('INFO: ', '').toLowerCase());
+  }
+
+  Future<bool> prefetchRepository() async {
+    final prefetcher = DeployGitPrefetcher(
+      rootPath: rootPathServer.value,
+      log: addLog,
+      runShell: runShell,
+    );
+    return prefetcher.prefetchRepository();
   }
 
   Future<void> run() async {
@@ -192,11 +293,34 @@ class ServerController extends GetxController with LogMixin {
       clearLog();
       shell!.kill();
       await runShell('echo OAS working directory: ');
-      await runShell('pwd');
-      await runShell('taskkill /f /t /im pythonw.exe');
-      await runShell('python -m deploy.installer');
+      await runShell('cd');
+      await runShell(
+        'taskkill /f /t /im pythonw.exe',
+        ignorePythonwNotRunning: true,
+      );
+      final prefetched = await prefetchRepository();
+      if (!prefetched) {
+        return;
+      }
+      final pythonConfig = DeployPythonConfig.read(rootPathServer.value);
+      final installed = await runShell(
+        shellExecutableArguments(
+          pythonConfig.getPythonPath(rootPathServer.value),
+          ['-m', 'deploy.installer'],
+        ),
+      );
+      if (!installed) {
+        return;
+      }
       await runShell('echo Start OAS');
-      runShell('.\\toolkit\\pythonw.exe  server.py');
+      unawaited(
+        runShell(
+          shellExecutableArguments(
+            pythonConfig.getPythonwPath(rootPathServer.value),
+            ['server.py'],
+          ),
+        ),
+      );
 
       final shouldAutoLogin = _resolveAutoLoginAfterDeploy();
       if (!shouldAutoLogin) {
@@ -236,8 +360,8 @@ class ServerController extends GetxController with LogMixin {
   }) async {
     final address =
         rawAddress.startsWith('http://') || rawAddress.startsWith('https://')
-            ? rawAddress
-            : 'http://$rawAddress';
+        ? rawAddress
+        : 'http://$rawAddress';
     ApiClient().setAddress(address);
 
     for (int i = 0; i < retries; i++) {
