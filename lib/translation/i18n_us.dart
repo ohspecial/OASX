@@ -55,6 +55,23 @@ final Map<String, String> _us_ui = {
   I18n.configImportFailed: 'Failed to import config',
   I18n.configExportSuccess: 'Config exported',
   I18n.configExportFailed: 'Failed to export config',
+  I18n.taskJsonImport: 'Import',
+  I18n.taskJsonExport: 'Export masked file',
+  I18n.taskJsonCopy: 'Copy unmasked info',
+  I18n.taskJsonSelectFile: 'Click to select or drop a JSON file here',
+  I18n.taskJsonChooseOne: 'Choose one option',
+  I18n.taskJsonTextHint: 'Paste task JSON content',
+  I18n.taskJsonSourceInvalid:
+      'Select a JSON file or enter JSON content, but not both',
+  I18n.taskJsonFileInvalid: 'The imported file must be a .json file',
+  I18n.taskJsonImportSuccess: 'Task JSON imported',
+  I18n.taskJsonImportFailed: 'Failed to import task JSON',
+  I18n.taskJsonExportSuccess: 'Task JSON exported',
+  I18n.taskJsonExportFailed: 'Failed to export task JSON',
+  I18n.taskJsonCopySuccess: 'Task JSON copied',
+  I18n.taskJsonCopyFailed: 'Failed to copy task JSON',
+  I18n.taskJsonDiscardDraftPrompt:
+      'Importing task JSON will discard unsaved changes. Continue?',
   I18n.configUpdateTip:
       'The current script is running, please stop it before making modifications.',
   I18n.minimizeToSystemTrayHelp:

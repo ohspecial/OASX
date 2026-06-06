@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:oasx/modules/args/index.dart';
 import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/modules/home/widgets/task_json_transfer_actions.dart';
 import 'package:oasx/translation/i18n_content.dart';
 
 class TaskParameterPanel extends StatefulWidget {
@@ -24,8 +25,10 @@ class TaskParameterPanel extends StatefulWidget {
 class _TaskParameterPanelState extends State<TaskParameterPanel> {
   Future<void>? _loadFuture;
   String _loadKey = '';
+  String _loadScopeKey = '';
   String _scriptName = '';
   String _taskName = '';
+  int _reloadSerial = 0;
 
   @override
   void didChangeDependencies() {
@@ -68,7 +71,14 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
                 child: Text(
                   _taskName.tr,
                   style: Theme.of(context).textTheme.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+              ),
+              TaskJsonTransferActions(
+                configName: _scriptName,
+                taskName: _taskName,
+                onImported: _reloadCurrentTask,
               ),
             ],
           ),
@@ -95,10 +105,10 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
                   activeDragPayload: dragPayload,
                   groupDragPayloadBuilder: canDragGroups
                       ? (groupName) => widget.controller.buildGroupDragPayload(
-                            sourceConfig: _scriptName,
-                            taskName: _taskName,
-                            groupName: groupName,
-                          )
+                          sourceConfig: _scriptName,
+                          taskName: _taskName,
+                          groupName: groupName,
+                        )
                       : null,
                   onGroupDragStarted: widget.controller.startConfigDrag,
                   onGroupDragEnded: widget.controller.clearConfigDrag,
@@ -118,11 +128,12 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
     final nextTask = widget.controller.activeTaskName.value.trim();
     final nextScript = widget.scriptModel.name.trim();
     final nextScope = widget.controller.linkedScopeScriptsFor(nextScript);
-    final nextKey = '$nextScript/$nextTask';
     final argsController = Get.find<ArgsController>();
-    if (nextTask.isEmpty || nextKey == _loadKey) {
+    final nextScopeKey = '$nextScript/$nextTask';
+    if (nextTask.isEmpty || nextScopeKey == _loadScopeKey) {
       if (nextTask.isEmpty) {
         _loadKey = '';
+        _loadScopeKey = '';
         _loadFuture = null;
         _scriptName = '';
         _taskName = '';
@@ -132,22 +143,44 @@ class _TaskParameterPanelState extends State<TaskParameterPanel> {
       }
       return;
     }
-    _scriptName = nextScript;
-    _taskName = nextTask;
-    _loadKey = nextKey;
+    _startLoad(nextScript, nextTask, nextScope);
+  }
+
+  Future<void> _reloadCurrentTask() async {
+    final script = _scriptName.trim();
+    final task = _taskName.trim();
+    if (script.isEmpty || task.isEmpty) {
+      return;
+    }
+    _reloadSerial++;
+    final scope = widget.controller.linkedScopeScriptsFor(script);
+    setState(() {
+      _startLoad(script, task, scope, force: true);
+    });
+    await _loadFuture;
+  }
+
+  void _startLoad(
+    String script,
+    String task,
+    List<String> scope, {
+    bool force = false,
+  }) {
+    _scriptName = script;
+    _taskName = task;
+    _loadScopeKey = '$script/$task';
+    if (force) {
+      _loadKey = '$_loadScopeKey/$_reloadSerial';
+    } else {
+      _loadKey = _loadScopeKey;
+    }
+    final argsController = Get.find<ArgsController>();
     _loadFuture = argsController.loadGroups(
       config: _scriptName,
       task: _taskName,
       stagingMode: true,
-      scopeScripts: nextScope,
-      saveArgumentOverride: (
-        config,
-        task,
-        group,
-        argument,
-        type,
-        value,
-      ) {
+      scopeScripts: scope,
+      saveArgumentOverride: (config, task, group, argument, type, value) {
         return widget.controller.applyLinkedSetArgument(
           config: config,
           task: task,

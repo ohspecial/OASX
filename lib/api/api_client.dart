@@ -22,6 +22,7 @@ import 'dio_http_cache/dio_http_cache.dart';
 
 part 'api_client_menu_config.dart';
 part 'api_client_config_transfer.dart';
+part 'api_client_task_transfer.dart';
 part 'api_client_script.dart';
 part 'api_client_feedback.dart';
 part 'api_client_statistics.dart';
