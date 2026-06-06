@@ -32,6 +32,7 @@ class TaskStatusPanel extends StatefulWidget {
 
 class _TaskStatusPanelState extends State<TaskStatusPanel> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final Set<String> _hiddenTaskIds = <String>{};
   String _searchQuery = '';
 
@@ -42,11 +43,13 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
       return;
     }
     _clearSearchState();
+    _scrollTaskListToTop();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -69,6 +72,7 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
                 ? Center(child: Text(_emptyMessage))
                 : ListView.separated(
                     key: const PageStorageKey<String>('home-task-status-list'),
+                    controller: _scrollController,
                     padding: EdgeInsets.zero,
                     itemCount: visibleTasks.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -197,6 +201,15 @@ class _TaskStatusPanelState extends State<TaskStatusPanel> {
     _hiddenTaskIds.clear();
     _searchController.clear();
     _searchQuery = '';
+  }
+
+  void _scrollTaskListToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) {
+        return;
+      }
+      _scrollController.jumpTo(0);
+    });
   }
 
   /// Releases optimistic hidden rows once the backend snapshot no longer emits them.

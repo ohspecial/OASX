@@ -53,6 +53,7 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
       return;
     }
     _enabledOverrides.clear();
+    _scrollTaskListToTop();
   }
 
   @override
@@ -275,6 +276,15 @@ class _TaskCatalogPanelState extends State<TaskCatalogPanel> {
   Future<void> _handleBackFromParameters() async {
     await Get.find<ArgsController>().discardDraftChanges();
     await widget.controller.closeTaskParameters();
+  }
+
+  void _scrollTaskListToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) {
+        return;
+      }
+      _scrollController.jumpTo(0);
+    });
   }
 
   void _syncEnabledOverrides(Set<String> enabledTaskNames) {
