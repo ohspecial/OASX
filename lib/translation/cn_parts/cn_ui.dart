@@ -172,6 +172,7 @@ final Map<String, String> _cn_ui = {
   I18n.homeConnectionRetryAction: '刷新',
   I18n.homeEmptyScriptHint: '请先添加一个配置',
   I18n.homeLoadingAutoDeploying: '正在自动部署，请稍后',
+  I18n.homeGoDeployPage: '前往部署页面',
   I18n.homeLoadingAutoLogin: '正在登录OAS，请稍后',
   I18n.homeLoadingConfigDetail: '正在加载配置详情，请稍后',
   I18n.homeScriptAbnormal: '异常',

@@ -6,6 +6,7 @@ import 'package:oasx/modules/common/widgets/add_config_dialog.dart';
 import 'package:oasx/modules/common/widgets/appbar.dart';
 import 'package:oasx/modules/home/controllers/dashboard_controller.dart';
 import 'package:oasx/modules/home/widgets/config_workbench.dart';
+import 'package:oasx/modules/server/controllers/server_controller.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/check_version.dart';
@@ -71,26 +72,9 @@ class _HomeViewState extends State<HomeView> {
               return const SizedBox.shrink();
             }
             return Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.25),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(
-                        width: 36,
-                        height: 36,
-                        child: CircularProgressIndicator(),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        message.tr,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                ),
+              child: _StartupLoadingOverlay(
+                message: message,
+                autoDeploying: controller.isStartupAutoDeploying.value,
               ),
             );
           }),
@@ -118,5 +102,83 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: body,
     );
+  }
+}
+
+class _StartupLoadingOverlay extends StatelessWidget {
+  const _StartupLoadingOverlay({
+    required this.message,
+    required this.autoDeploying,
+  });
+
+  final String message;
+  final bool autoDeploying;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black.withValues(alpha: 0.25),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 36,
+                  height: 36,
+                  child: CircularProgressIndicator(),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  message.tr,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                if (autoDeploying) const _AutoDeployStatusView(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AutoDeployStatusView extends StatelessWidget {
+  const _AutoDeployStatusView();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<ServerController>()) {
+      return const SizedBox.shrink();
+    }
+    final controller = Get.find<ServerController>();
+    return Obx(() {
+      final log = controller.latestLog.value.trim();
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (log.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              log,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: () => Get.toNamed('/server'),
+            icon: const Icon(Icons.open_in_new_rounded),
+            label: Text(I18n.homeGoDeployPage.tr),
+          ),
+        ],
+      );
+    });
   }
 }

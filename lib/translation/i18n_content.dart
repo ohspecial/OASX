@@ -136,6 +136,7 @@ class I18n {
       homeConnectionRetryAction = 'home_connection_retry_action',
       homeEmptyScriptHint = 'home_empty_script_hint';
   static const String homeLoadingAutoDeploying = 'home_loading_auto_deploying',
+      homeGoDeployPage = 'home_go_deploy_page',
       homeLoadingAutoLogin = 'home_loading_auto_login',
       homeLoadingConfigDetail = 'home_loading_config_detail';
   static const String homeScriptAbnormal = 'home_script_abnormal',

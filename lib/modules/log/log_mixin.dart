@@ -23,6 +23,9 @@ mixin LogMixin on GetxController {
 
   final archivedLogs = <String>[].obs;
 
+  /// Latest log written through this controller.
+  final latestLog = ''.obs;
+
   final autoScroll = true.obs;
 
   final collapseLog = false.obs;
@@ -142,6 +145,7 @@ mixin LogMixin on GetxController {
   }
 
   void addLog(String log) {
+    latestLog.value = log;
     _pendingLogs.add(log);
   }
 
@@ -149,10 +153,14 @@ mixin LogMixin on GetxController {
   void upsertLog(String log, bool Function(String log) shouldReplace) {
     final pendingUpdated = _replaceLatestLog(_pendingLogs, log, shouldReplace);
     if (pendingUpdated) {
+      latestLog.value = log;
       return;
     }
     final logsUpdated = _replaceLatestLog(logs, log, shouldReplace);
     final archivedUpdated = _replaceLatestLog(archivedLogs, log, shouldReplace);
+    if (logsUpdated || archivedUpdated) {
+      latestLog.value = log;
+    }
     if (logsUpdated) {
       logs.refresh();
     }
@@ -182,6 +190,7 @@ mixin LogMixin on GetxController {
     logs.clear();
     archivedLogs.clear();
     _pendingLogs.clear();
+    latestLog.value = '';
   }
 
   void copyLogs() {

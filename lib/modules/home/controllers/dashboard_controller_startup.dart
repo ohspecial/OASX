@@ -87,12 +87,12 @@ extension HomeDashboardStartupX on HomeDashboardController {
         return;
       }
 
+      final serverController = Get.isRegistered<ServerController>()
+          ? Get.find<ServerController>()
+          : Get.put<ServerController>(ServerController(), permanent: true);
       startupLoadingMessage.value = I18n.homeLoadingAutoDeploying;
       isStartupAutoDeploying.value = true;
       try {
-        final serverController = Get.isRegistered<ServerController>()
-            ? Get.find<ServerController>()
-            : Get.put<ServerController>(ServerController(), permanent: true);
         await serverController.run();
         await _waitUntilDeployFinished(serverController);
       } finally {

@@ -104,6 +104,7 @@ final Map<String, String> _us_ui = {
   I18n.homeConnectionRetryAction: 'Refresh',
   I18n.homeEmptyScriptHint: 'Add a config first',
   I18n.homeLoadingAutoDeploying: 'Auto deployment in progress, please wait',
+  I18n.homeGoDeployPage: 'Go to deploy page',
   I18n.homeLoadingAutoLogin: 'Logging into OAS, please wait',
   I18n.homeLoadingConfigDetail: 'Loading config details, please wait',
   I18n.homeScriptAbnormal: 'Abnormal',
