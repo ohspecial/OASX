@@ -29,6 +29,7 @@ class ConfigCollectionPanel extends StatefulWidget {
     required this.onActivateScript,
     required this.onTogglePower,
     required this.onRenameScript,
+    required this.onExportScript,
     required this.onDeleteScript,
   });
 
@@ -41,6 +42,7 @@ class ConfigCollectionPanel extends StatefulWidget {
   final Future<void> Function(String scriptName) onActivateScript;
   final Future<void> Function(String scriptName, bool enable) onTogglePower;
   final Future<void> Function(String scriptName) onRenameScript;
+  final Future<void> Function(String scriptName) onExportScript;
   final Future<void> Function(String scriptName) onDeleteScript;
 
   @override
@@ -184,6 +186,7 @@ class _ConfigCollectionPanelState extends State<ConfigCollectionPanel> {
               script.state.value != ScriptState.running,
             ),
             onRename: () => widget.onRenameScript(script.name),
+            onExport: () => widget.onExportScript(script.name),
             onDelete: () => widget.onDeleteScript(script.name),
           ),
         );

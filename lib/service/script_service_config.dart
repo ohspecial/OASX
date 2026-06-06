@@ -10,6 +10,18 @@ extension ScriptServiceConfigX on ScriptService {
     await _connectKnownConfig(configName);
   }
 
+  /// Imports one external config file and connects the created config.
+  Future<String> importConfig({
+    required String configName,
+    required String filePath,
+  }) async {
+    final result = await ApiClient().importConfig(configName, filePath);
+    final importedName = result.name.trim();
+    await refreshScriptsFromServer();
+    await _connectKnownConfig(importedName);
+    return importedName;
+  }
+
   /// Renames one config and rebuilds its realtime runtime under the new name.
   Future<bool> renameConfig(String oldName, String newName) async {
     final ret = await ApiClient().renameConfig(oldName, newName);

@@ -47,6 +47,14 @@ final Map<String, String> _us_ui = {
   I18n.deployFileImportFailed: 'Failed to import deploy file',
   I18n.deployFileExportSuccess: 'Deploy file exported',
   I18n.deployFileExportFailed: 'Failed to export deploy file',
+  I18n.configImportJson: 'Import JSON config',
+  I18n.configExport: 'Export',
+  I18n.selectConfigJsonFile: 'Click to select or drop a JSON config file here',
+  I18n.configJsonFileInvalid: 'The imported file must be a .json file',
+  I18n.configImportSuccess: 'Config imported',
+  I18n.configImportFailed: 'Failed to import config',
+  I18n.configExportSuccess: 'Config exported',
+  I18n.configExportFailed: 'Failed to export config',
   I18n.configUpdateTip:
       'The current script is running, please stop it before making modifications.',
   I18n.minimizeToSystemTrayHelp:

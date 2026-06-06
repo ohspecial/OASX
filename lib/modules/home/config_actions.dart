@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
+import 'package:oasx/api/api_client.dart';
+import 'package:oasx/api/config_transfer_models.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
+import 'package:oasx/utils/browser_download_io.dart'
+    if (dart.library.html) 'package:oasx/utils/browser_download_web.dart';
+import 'package:oasx/utils/file_save_stub.dart'
+    if (dart.library.io) 'package:oasx/utils/file_save_io.dart';
 
 class ConfigActions {
   const ConfigActions._();
@@ -52,9 +60,7 @@ class ConfigActions {
         key: formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: TextFormField(
-          decoration: InputDecoration(
-            labelText: I18n.newName.tr,
-          ),
+          decoration: InputDecoration(labelText: I18n.newName.tr),
           validator: (String? value) {
             final input = value?.trim() ?? '';
             return validateRenameName(
@@ -106,5 +112,36 @@ class ConfigActions {
       },
       onCancel: () {},
     );
+  }
+
+  static Future<void> exportScript({required String name}) async {
+    try {
+      final payload = await ApiClient().exportConfig(name);
+      if (kIsWeb) {
+        await downloadBytesToBrowser(
+          payload.bytes,
+          payload.fileName,
+          mimeType: 'application/json',
+        );
+        Get.snackbar(I18n.tip.tr, I18n.configExportSuccess.tr);
+        return;
+      }
+      final path = await FilePicker.platform.saveFile(
+        fileName: payload.fileName,
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+        bytes: payload.bytes,
+      );
+      if (path == null || path.trim().isEmpty) {
+        return;
+      }
+      await saveBytesToPath(path, payload.bytes);
+      Get.snackbar(I18n.tip.tr, I18n.configExportSuccess.tr);
+    } catch (e) {
+      final message = e is ConfigTransferException
+          ? e.message
+          : I18n.configExportFailed.tr;
+      Get.snackbar(I18n.tip.tr, message);
+    }
   }
 }

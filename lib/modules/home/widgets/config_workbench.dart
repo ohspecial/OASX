@@ -44,8 +44,11 @@ class ConfigWorkbench extends StatelessWidget {
             _activateScript(context, scriptName, layoutMode),
         onTogglePower: (scriptName, enable) =>
             controller.applySelectionPowerToggle(
-                sourceScript: scriptName, enable: enable),
+              sourceScript: scriptName,
+              enable: enable,
+            ),
         onRenameScript: (scriptName) => _renameScript(context, scriptName),
+        onExportScript: _exportScript,
         onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
       ),
       detailsBuilder: (layoutMode, onExpandRightSidebar) => ActiveConfigPanel(
@@ -56,7 +59,9 @@ class ConfigWorkbench extends StatelessWidget {
             _openTaskFromSource(context, taskName, source),
         onTogglePower: (scriptName, enable) =>
             controller.applySelectionPowerToggle(
-                sourceScript: scriptName, enable: enable),
+              sourceScript: scriptName,
+              enable: enable,
+            ),
         onRenameScript: (scriptName) => _renameScript(context, scriptName),
         onDeleteScript: (scriptName) => _deleteScript(context, scriptName),
         onSetNextRun: _setTaskNextRun,
@@ -98,10 +103,7 @@ class ConfigWorkbench extends StatelessWidget {
     }
   }
 
-  Future<void> _changeTab(
-    BuildContext context,
-    HomeWorkbenchTab tab,
-  ) async {
+  Future<void> _changeTab(BuildContext context, HomeWorkbenchTab tab) async {
     if (controller.activeWorkbenchTab.value == tab) {
       return;
     }
@@ -183,6 +185,10 @@ class ConfigWorkbench extends StatelessWidget {
       name: scriptName,
     );
     controller.syncWorkspaceState();
+  }
+
+  Future<void> _exportScript(String scriptName) async {
+    await ConfigActions.exportScript(name: scriptName);
   }
 
   Future<bool> _confirmDiscardDraft(BuildContext context) async {

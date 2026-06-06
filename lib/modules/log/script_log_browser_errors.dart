@@ -187,7 +187,11 @@ extension ScriptLogBrowserErrorsX on ScriptLogBrowserController {
         image.name,
       );
       if (kIsWeb) {
-        await downloadBytesToBrowser(payload.bytes, payload.fileName);
+        await downloadBytesToBrowser(
+          payload.bytes,
+          payload.fileName,
+          mimeType: 'image/png',
+        );
         Get.snackbar(
           I18n.tip.tr,
           I18n.homeLogImageSaveSuccess.tr,

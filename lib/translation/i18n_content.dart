@@ -89,6 +89,14 @@ class I18n {
       configUpdateTip = 'Config update tip',
       configAdd = 'Add new config';
   static const String configCopyFromExist = 'Copy from existing config',
+      configImportJson = 'config_import_json',
+      configExport = 'config_export',
+      selectConfigJsonFile = 'select_config_json_file',
+      configJsonFileInvalid = 'config_json_file_invalid',
+      configImportSuccess = 'config_import_success',
+      configImportFailed = 'config_import_failed',
+      configExportSuccess = 'config_export_success',
+      configExportFailed = 'config_export_failed',
       settingSaved = 'Setting saved',
       rememberWindowPositionSize = 'Remember window positon and size';
   static const String minimizeToSystemTray = 'Minimize to system tray',
