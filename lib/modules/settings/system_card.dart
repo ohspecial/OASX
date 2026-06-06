@@ -7,6 +7,7 @@ import 'package:oasx/modules/settings/controllers/settings_controller.dart';
 import 'package:oasx/modules/settings/widgets/setting_card.dart';
 import 'package:oasx/modules/settings/widgets/setting_item.dart';
 import 'package:oasx/service/autostart_service.dart';
+import 'package:oasx/service/app_exit_service.dart';
 import 'package:oasx/service/app_update_service.dart';
 import 'package:oasx/service/locale_service.dart';
 import 'package:oasx/service/theme_service.dart';
@@ -49,6 +50,18 @@ class SystemSettingsCard extends StatelessWidget {
             ),
             right: const SystemTraySwitch(),
           ),
+        SettingItem(
+          left: Row(
+            children: [
+              Text(I18n.shutdownOasOnExit.tr),
+              Tooltip(
+                message: I18n.shutdownOasOnExitHelp.tr,
+                child: const Icon(Icons.help_outline, size: 16),
+              ).paddingOnly(left: 5),
+            ],
+          ),
+          right: const ShutdownOasOnExitSwitch(),
+        ),
         if (PlatformUtils.isDesktop)
           SettingItem(
             left: Row(
@@ -136,10 +149,12 @@ class WindowStateSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final windowService = Get.find<WindowService>();
-    return Obx(() => Switch(
-          value: windowService.enableWindowState.value,
-          onChanged: windowService.updateWindowStateEnable,
-        ));
+    return Obx(
+      () => Switch(
+        value: windowService.enableWindowState.value,
+        onChanged: windowService.updateWindowStateEnable,
+      ),
+    );
   }
 }
 
@@ -149,10 +164,27 @@ class SystemTraySwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final windowService = Get.find<WindowService>();
-    return Obx(() => Switch(
-          value: windowService.enableSystemTray.value,
-          onChanged: windowService.updateSystemTrayEnable,
-        ));
+    return Obx(
+      () => Switch(
+        value: windowService.enableSystemTray.value,
+        onChanged: windowService.updateSystemTrayEnable,
+      ),
+    );
+  }
+}
+
+class ShutdownOasOnExitSwitch extends StatelessWidget {
+  const ShutdownOasOnExitSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final appExitService = Get.find<AppExitService>();
+    return Obx(
+      () => Switch(
+        value: appExitService.shutdownOasOnExit.value,
+        onChanged: appExitService.updateShutdownOasOnExit,
+      ),
+    );
   }
 }
 
@@ -162,12 +194,14 @@ class LaunchAtStartupSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final autoStartService = Get.find<AutoStartService>();
-    return Obx(() => Switch(
-          value: autoStartService.enableLaunchAtStartup.value,
-          onChanged: autoStartService.isApplying.value
-              ? null
-              : autoStartService.updateLaunchAtStartupEnable,
-        ));
+    return Obx(
+      () => Switch(
+        value: autoStartService.enableLaunchAtStartup.value,
+        onChanged: autoStartService.isApplying.value
+            ? null
+            : autoStartService.updateLaunchAtStartupEnable,
+      ),
+    );
   }
 }
 
@@ -187,8 +221,9 @@ class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
   void initState() {
     super.initState();
     _settingsController = Get.find<SettingsController>();
-    _controller =
-        TextEditingController(text: _settingsController.updateProxyUrl.value);
+    _controller = TextEditingController(
+      text: _settingsController.updateProxyUrl.value,
+    );
     _focusNode = FocusNode();
   }
 
@@ -216,13 +251,11 @@ class _UpdateProxyUrlFieldState extends State<UpdateProxyUrlField> {
             bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
           ),
           textInputAction: TextInputAction.done,
-          decoration: const InputDecoration(
-            hintText: 'http://127.0.0.1:7897',
-          ),
-          onTapOutside:
-              PlatformUtils.isWeb ? null : (_) => _focusNode.unfocus(),
-          onEditingComplete:
-              PlatformUtils.isWeb ? null : _focusNode.unfocus,
+          decoration: const InputDecoration(hintText: 'http://127.0.0.1:7897'),
+          onTapOutside: PlatformUtils.isWeb
+              ? null
+              : (_) => _focusNode.unfocus(),
+          onEditingComplete: PlatformUtils.isWeb ? null : _focusNode.unfocus,
           onChanged: _settingsController.updateUpdateProxyUrl,
         ),
       );
@@ -254,10 +287,7 @@ class CheckUpdateButton extends StatelessWidget {
       return ElevatedButton(
         onPressed: appUpdateService.isCheckingForUpdates.value
             ? null
-            : () async => await checkUpdate(
-                  showTip: true,
-                  forceCheck: true,
-                ),
+            : () async => await checkUpdate(showTip: true, forceCheck: true),
         child: appUpdateService.isCheckingForUpdates.value
             ? const SizedBox(
                 width: 16,

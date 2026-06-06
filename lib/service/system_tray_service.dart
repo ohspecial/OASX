@@ -1,6 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
+import 'package:oasx/service/app_exit_service.dart';
 import 'package:oasx/service/script_service.dart';
 import 'package:oasx/translation/i18n_content.dart';
 import 'package:oasx/utils/platform_utils.dart';
@@ -72,6 +73,7 @@ class SystemTrayService extends GetxService {
       MenuItemLabel(
         label: I18n.exit.tr,
         onClicked: (_) async {
+          await _shutdownOasForExit();
           await windowManager.setPreventClose(false);
           await hideTray();
           await windowManager.close();
@@ -91,19 +93,21 @@ class SystemTrayService extends GetxService {
       return [MenuItemLabel(label: I18n.empty.tr)];
     }
     return scriptService.scriptModelMap.values
-        .map((e) => MenuItemCheckbox(
-              label: buildCheckBoxLabel(e),
-              checked: e.state.value == ScriptState.running,
-              onClicked: (menuItem) async {
-                if (menuItem.checked) {
-                  // 褰撳墠姝ｅ湪杩愯
-                  await Get.find<ScriptService>().stopScript(e.name);
-                } else {
-                  await Get.find<ScriptService>().startScript(e.name);
-                }
-                await menuItem.setCheck(!menuItem.checked);
-              },
-            ))
+        .map(
+          (e) => MenuItemCheckbox(
+            label: buildCheckBoxLabel(e),
+            checked: e.state.value == ScriptState.running,
+            onClicked: (menuItem) async {
+              if (menuItem.checked) {
+                // 褰撳墠姝ｅ湪杩愯
+                await Get.find<ScriptService>().stopScript(e.name);
+              } else {
+                await Get.find<ScriptService>().startScript(e.name);
+              }
+              await menuItem.setCheck(!menuItem.checked);
+            },
+          ),
+        )
         .toList();
   }
 
@@ -112,5 +116,10 @@ class SystemTrayService extends GetxService {
       return scriptModel.name;
     }
     return '${scriptModel.name} - ${scriptModel.runningTask.value.taskName.value.tr}';
+  }
+
+  Future<void> _shutdownOasForExit() async {
+    if (!Get.isRegistered<AppExitService>()) return;
+    await Get.find<AppExitService>().shutdownOasForExitIfEnabled();
   }
 }

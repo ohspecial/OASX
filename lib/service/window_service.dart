@@ -6,9 +6,13 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:oasx/modules/common/models/storage_key.dart';
 import 'package:oasx/modules/common/models/window_state.dart';
+import 'package:oasx/modules/common/widgets/exit_confirm_dialog.dart';
+import 'package:oasx/service/app_exit_service.dart';
 import 'package:oasx/service/system_tray_service.dart';
 import 'package:oasx/utils/platform_utils.dart';
 import 'package:window_manager/window_manager.dart';
+
+part 'window_service_exit.dart';
 
 const Size _defaultDesktopWindowSize = Size(1200, 800);
 const Size _minimumWindowsWindowSize = Size(260, 420);
@@ -20,6 +24,7 @@ class WindowService extends GetxService with WindowListener {
   Future<void> get ready => _readyCompleter.future;
 
   bool _didInitDesktop = false;
+  bool _isSystemTrayReady = false;
   int _trayInitToken = 0;
 
   Timer? _debounceTimer;
@@ -64,12 +69,13 @@ class WindowService extends GetxService with WindowListener {
     if (!PlatformUtils.isDesktop) return;
 
     if (!enableSystemTray.value) {
-      unawaited(windowManager.setPreventClose(false));
+      _isSystemTrayReady = false;
+      unawaited(windowManager.setPreventClose(true));
       return;
     }
 
-    // 托盘启用时，先保证可关闭；待托盘创建成功后再拦截关闭事件，避免开机登录时托盘未就绪导致“无法退出”。
-    unawaited(windowManager.setPreventClose(false));
+    _isSystemTrayReady = false;
+    unawaited(windowManager.setPreventClose(true));
 
     final token = ++_trayInitToken;
     unawaited(_ensureSystemTrayReady(token));
@@ -87,6 +93,7 @@ class WindowService extends GetxService with WindowListener {
 
       final ok = await Get.find<SystemTrayService>().showTray();
       if (ok) {
+        _isSystemTrayReady = true;
         await windowManager.setPreventClose(true);
         return;
       }
@@ -95,6 +102,8 @@ class WindowService extends GetxService with WindowListener {
     }
 
     printInfo(info: 'system tray init failed, allow window close.');
+    _isSystemTrayReady = false;
+    await windowManager.setPreventClose(true);
   }
 
   WindowOptions buildWindowOptions(WindowStateModel? lastState) {
@@ -191,13 +200,9 @@ class WindowService extends GetxService with WindowListener {
     final preventClose = await windowManager.isPreventClose();
     if (!preventClose) return;
     await _saveWindowState();
-    // 检查是否已经设置了最小化到托盘的选项
-    if (enableSystemTray.value) {
-      await windowManager.hide();
-      return;
-    }
-    await windowManager.setPreventClose(false);
-    await windowManager.close();
+    final result = await _resolveCloseAction();
+    if (result == null) return;
+    await _applyCloseAction(result);
   }
 
   @override
@@ -215,8 +220,7 @@ class WindowService extends GetxService with WindowListener {
   }
 
   Future<void> updateSystemTrayEnable(bool newVal) async {
-    enableSystemTray.value = newVal;
-    _storage.write(StorageKey.enableSystemTray.name, newVal);
+    _updateSystemTrayPreference(newVal);
 
     if (!PlatformUtils.isDesktop) return;
 
@@ -226,10 +230,16 @@ class WindowService extends GetxService with WindowListener {
     }
 
     _trayInitToken++;
-    await windowManager.setPreventClose(false);
+    _isSystemTrayReady = false;
+    await windowManager.setPreventClose(true);
     if (!Get.isRegistered<SystemTrayService>()) {
       return;
     }
     await Get.find<SystemTrayService>().hideTray();
+  }
+
+  void _updateSystemTrayPreference(bool enabled) {
+    enableSystemTray.value = enabled;
+    _storage.write(StorageKey.enableSystemTray.name, enabled);
   }
 }

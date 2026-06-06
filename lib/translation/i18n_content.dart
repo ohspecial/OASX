@@ -101,6 +101,8 @@ class I18n {
       rememberWindowPositionSize = 'Remember window positon and size';
   static const String minimizeToSystemTray = 'Minimize to system tray',
       minimizeToSystemTrayHelp = 'Minimize to system tray help',
+      shutdownOasOnExit = 'Shutdown OAS on exit',
+      shutdownOasOnExitHelp = 'Shutdown OAS on exit help',
       launchAtStartup = 'Launch at startup';
   static const String launchAtStartupHelp = 'Launch at startup help',
       launchAtStartupUpdateFailed = 'Launch at startup update failed',
@@ -109,6 +111,9 @@ class I18n {
       scriptList = 'Script list';
   static const String showWindow = 'Show window',
       exit = 'Exit',
+      exitOasx = 'Exit OASX',
+      exitDialogMinimizeToTray = 'exit_dialog_minimize_to_tray',
+      doNotRemindAgain = 'Do not remind again',
       empty = 'Empty';
   static const String systemSetting = 'System setting',
       userSetting = 'User setting',

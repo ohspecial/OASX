@@ -59,6 +59,9 @@ final Map<String, String> _us_ui = {
       'The current script is running, please stop it before making modifications.',
   I18n.minimizeToSystemTrayHelp:
       'Minimized to the system tray when closing a window',
+  I18n.shutdownOasOnExit: 'Shut down OAS on exit',
+  I18n.shutdownOasOnExitHelp:
+      'Automatically shut down OAS when OASX really exits. Minimize to tray will not trigger it',
   I18n.launchAtStartupHelp: 'Launch OASX when you sign in',
   I18n.launchAtStartupUpdateFailed: 'Failed to update launch at startup',
   I18n.updateProxyUrl: 'Proxy URL',
@@ -80,6 +83,9 @@ final Map<String, String> _us_ui = {
   I18n.updateInstallStarted: 'The platform installer has been opened',
   I18n.updateAllowUnknownApps:
       'Allow installs from this source first, then try again',
+  I18n.exitOasx: 'Exit OASX',
+  I18n.exitDialogMinimizeToTray: 'Minimize to system tray',
+  I18n.doNotRemindAgain: 'Do not remind again',
   I18n.scriptList: 'Configs',
   I18n.loginAddress: 'Login address',
   I18n.username: 'Username',
