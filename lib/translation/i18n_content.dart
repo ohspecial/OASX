@@ -109,6 +109,9 @@ class I18n {
       updateProxyUrl = 'update_proxy_url',
       updateProxyUrlHelp = 'update_proxy_url_help',
       scriptList = 'Script list';
+  static const String trayRunningConfigs = 'tray_running_configs',
+      trayStoppedConfigs = 'tray_stopped_configs',
+      trayAbnormalConfigs = 'tray_abnormal_configs';
   static const String showWindow = 'Show window',
       exit = 'Exit',
       exitOasx = 'Exit OASX',

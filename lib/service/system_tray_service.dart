@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:oasx/modules/home/models/config_model.dart';
 import 'package:oasx/service/app_exit_service.dart';
@@ -8,11 +9,18 @@ import 'package:oasx/utils/platform_utils.dart';
 import 'package:system_tray/system_tray.dart';
 import 'package:window_manager/window_manager.dart';
 
+part 'system_tray_service_menu.dart';
+
 class SystemTrayService extends GetxService {
+  static const MethodChannel _trayThemeChannel = MethodChannel(
+    'oasx/tray_theme',
+  );
+
   final SystemTray _systemTray = SystemTray();
   final AppWindow _appWindow = AppWindow();
 
   bool _isTrayVisible = false;
+  bool? _lastAppliedTrayDarkMode;
 
   Future<bool> showTray() async {
     if (!PlatformUtils.isDesktop) return false;
@@ -59,9 +67,10 @@ class SystemTrayService extends GetxService {
   }
 
   Future<void> _rebuildMenu() async {
+    await syncTrayTheme();
     final Menu mainMenu = Menu();
     await mainMenu.buildFrom([
-      SubMenu(label: I18n.scriptList.tr, children: buildScriptMenuList()),
+      ...buildScriptMenuGroups(),
       MenuSeparator(),
       MenuItemLabel(
         label: I18n.showWindow.tr,
@@ -83,39 +92,17 @@ class SystemTrayService extends GetxService {
     await _systemTray.setContextMenu(mainMenu);
   }
 
-  List<MenuItemBase> buildScriptMenuList() {
-    if (!Get.isRegistered<ScriptService>()) {
-      return [MenuItemLabel(label: I18n.empty.tr)];
-    }
-    final scriptService = Get.find<ScriptService>();
-    if (scriptService.scriptModelMap.isEmpty ||
-        scriptService.scriptModelMap.values.isEmpty) {
-      return [MenuItemLabel(label: I18n.empty.tr)];
-    }
-    return scriptService.scriptModelMap.values
-        .map(
-          (e) => MenuItemCheckbox(
-            label: buildCheckBoxLabel(e),
-            checked: e.state.value == ScriptState.running,
-            onClicked: (menuItem) async {
-              if (menuItem.checked) {
-                // 褰撳墠姝ｅ湪杩愯
-                await Get.find<ScriptService>().stopScript(e.name);
-              } else {
-                await Get.find<ScriptService>().startScript(e.name);
-              }
-              await menuItem.setCheck(!menuItem.checked);
-            },
-          ),
-        )
-        .toList();
-  }
-
-  String buildCheckBoxLabel(ScriptModel scriptModel) {
-    if (scriptModel.runningTask.value.isAllEmpty()) {
-      return scriptModel.name;
-    }
-    return '${scriptModel.name} - ${scriptModel.runningTask.value.taskName.value.tr}';
+  Future<void> syncTrayTheme([bool? darkMode]) async {
+    if (!Platform.isWindows) return;
+    final dark = darkMode ?? Get.isDarkMode;
+    if (_lastAppliedTrayDarkMode == dark) return;
+    try {
+      final applied = await _trayThemeChannel.invokeMethod<bool>(
+        'setDarkMode',
+        {'dark': dark},
+      );
+      if (applied == true) _lastAppliedTrayDarkMode = dark;
+    } catch (_) {}
   }
 
   Future<void> _shutdownOasForExit() async {
