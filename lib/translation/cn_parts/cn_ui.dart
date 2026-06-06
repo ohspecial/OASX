@@ -253,7 +253,7 @@ final Map<String, String> _cn_ui = {
   I18n.homeLogEmptyFiltered: '没有匹配的日志',
   I18n.homeLogInfoTab: '信息',
   I18n.homeLogErrorTab: '错误',
-  I18n.homeLogNoErrors: '今天暂无错误日志',
+  I18n.homeLogNoErrors: '暂无错误日志',
   I18n.homeLogImages: '张截图',
   I18n.homeLogSelectError: '请选择一条错误日志',
   I18n.homeLogDownloadImage: '下载图片',
