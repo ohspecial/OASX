@@ -112,7 +112,9 @@ class _TaskJsonTransferActionsState extends State<TaskJsonTransferActions> {
         bytes: payload.bytes,
       );
       if (path == null || path.trim().isEmpty) return;
-      await saveBytesToPath(path, payload.bytes);
+      if (shouldWritePickedSavePath()) {
+        await saveBytesToPath(path, payload.bytes);
+      }
       Get.snackbar(I18n.tip.tr, I18n.taskJsonExportSuccess.tr);
     }, I18n.taskJsonExportFailed.tr);
   }

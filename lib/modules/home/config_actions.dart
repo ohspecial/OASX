@@ -135,7 +135,9 @@ class ConfigActions {
       if (path == null || path.trim().isEmpty) {
         return;
       }
-      await saveBytesToPath(path, payload.bytes);
+      if (shouldWritePickedSavePath()) {
+        await saveBytesToPath(path, payload.bytes);
+      }
       Get.snackbar(I18n.tip.tr, I18n.configExportSuccess.tr);
     } catch (e) {
       final message = e is ConfigTransferException
