@@ -300,7 +300,7 @@ class ServerController extends GetxController with LogMixin {
       );
       final prefetched = await prefetchRepository();
       if (!prefetched) {
-        return;
+        addLog('WARNING: Git prefetch failed, continue deploy installer');
       }
       final pythonConfig = DeployPythonConfig.read(rootPathServer.value);
       final installed = await runShell(
@@ -310,7 +310,7 @@ class ServerController extends GetxController with LogMixin {
         ),
       );
       if (!installed) {
-        return;
+        addLog('WARNING: Deploy installer failed, continue starting local OAS');
       }
       await runShell('echo Start OAS');
       unawaited(
